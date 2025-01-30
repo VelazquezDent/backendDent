@@ -20,7 +20,7 @@ const registrarUsuario = async (req, res) => {
         const codigo_verificacion = crypto.randomBytes(4).toString('hex');
 
         // Crear el usuario en la base de datos
-        const usuario_id = await crearUsuario({
+        const usuario_id = await userModel.crearUsuario({
             nombre,
             apellido_paterno,
             apellido_materno,
