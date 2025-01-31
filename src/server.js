@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const usuarioRoutes = require('./routes/usuarioRoutes');
+const tratamientoRoutes = require('./routes/tratamientoRoutes');
+
 const app = express();
 const port = 4000;
 
@@ -18,7 +20,7 @@ app.use(
 
 // Rutas
 app.use('/api/usuarios', usuarioRoutes);
-
+app.use('/api/tratamientos', tratamientoRoutes);
 // Iniciar el servidor
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
