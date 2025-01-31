@@ -1,4 +1,11 @@
 const userModel = require('../models/usuarioModel');
+const {
+    validarFortalezaContrasena,
+    validarNombre,
+    validarTelefono,
+    validarEdad,
+    validarCorreo
+} = require('../utils/validations');
 const { enviarCorreo } = require('../utils/mailer');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
@@ -8,9 +15,34 @@ const registrarUsuario = async (req, res) => {
     try {
         const { nombre, apellido_paterno, apellido_materno, telefono, edad, sexo, email, password, repetir_password } = req.body;
 
-        // Validar que las contraseñas coincidan
+        // Validaciones de datos
+        const errores = [];
+
+        const errorNombre = validarNombre(nombre);
+        if (errorNombre) errores.push(errorNombre);
+
+        const errorApellidoPaterno = validarNombre(apellido_paterno);
+        if (errorApellidoPaterno) errores.push("Apellido paterno: " + errorApellidoPaterno);
+
+        const errorTelefono = validarTelefono(telefono);
+        if (errorTelefono) errores.push(errorTelefono);
+
+        const errorEdad = validarEdad(edad);
+        if (errorEdad) errores.push(errorEdad);
+
+        const errorCorreo = validarCorreo(email);
+        if (errorCorreo) errores.push(errorCorreo);
+
+        const errorPassword = validarFortalezaContrasena(password);
+        if (errorPassword) errores.push(errorPassword);
+
         if (password !== repetir_password) {
-            return res.status(400).json({ mensaje: 'Las contraseñas no coinciden' });
+            errores.push("Las contraseñas no coinciden.");
+        }
+
+        // Si hay errores, retornar respuesta con los mensajes
+        if (errores.length > 0) {
+            return res.status(400).json({ errores });
         }
 
         // Hashear la contraseña
@@ -33,7 +65,7 @@ const registrarUsuario = async (req, res) => {
         });
 
         // Guardar la contraseña en el historial
-        await userModel.guardarHistorialContraseña(usuario_id, hashedPassword);
+        await userModel.guardarHistorialContrasena(usuario_id, hashedPassword);
 
         // Enviar el correo de verificación
         await enviarCorreo(
@@ -68,12 +100,15 @@ const registrarUsuario = async (req, res) => {
             </div>
             `
         );
-        
 
         res.status(201).json({ mensaje: 'Usuario registrado. Revisa tu correo para verificar tu cuenta.' });
     } catch (error) {
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ mensaje: 'El correo ya está registrado. Por favor, usa otro.' });
+        } 
+        
         console.error('Error al registrar usuario:', error);
-        res.status(500).json({ mensaje: 'Error interno del servidor' });
+        res.status(500).json({ mensaje: 'Error interno del servidor.' });
     }
 };
 // Función para verificar el código de registro
@@ -103,9 +138,24 @@ const verificarCodigo = async (req, res) => {
     }
 };
 // Función para manejar el login del usuario
+// Función para manejar el login del usuario
 const loginUsuario = async (req, res) => {
     try {
         const { email, password } = req.body;
+
+        // Validaciones de datos
+        const errores = [];
+
+        const errorCorreo = validarCorreo(email);
+        if (errorCorreo) errores.push(errorCorreo);
+
+        if (!password || !password.trim()) {
+            errores.push("La contraseña no puede estar vacía.");
+        }
+
+        if (errores.length > 0) {
+            return res.status(400).json({ errores });
+        }
 
         // Buscar al usuario en la base de datos
         const usuario = await userModel.obtenerUsuarioPorEmail(email);
@@ -129,4 +179,4 @@ const loginUsuario = async (req, res) => {
         res.status(500).json({ mensaje: 'Error interno del servidor.' });
     }
 };
-module.exports = { registrarUsuario, verificarCodigo,loginUsuario };
+module.exports = { registrarUsuario, verificarCodigo, loginUsuario };

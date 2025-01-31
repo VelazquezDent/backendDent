@@ -14,7 +14,7 @@ const crearUsuario = async (usuarioData) => {
 };
 
 // Función para registrar la contraseña en el historial
-const guardarHistorialContraseña = async (usuario_id, hashedPassword) => {
+const guardarHistorialContrasena = async (usuario_id, hashedPassword) => {
     await db.query(
         `INSERT INTO historial_contraseñas (usuario_id, password, fecha_creacion) VALUES (?, ?, NOW())`,
         [usuario_id, hashedPassword]
@@ -49,7 +49,7 @@ const obtenerUsuarioPorEmail = async (email) => {
 
 module.exports = {
     crearUsuario,
-    guardarHistorialContraseña,
+    guardarHistorialContrasena,
     obtenerUsuarioPorCodigo,
     marcarUsuarioVerificado,
     obtenerUsuarioPorEmail

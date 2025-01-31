@@ -1,15 +1,43 @@
 const tratamientoModel = require('../models/tratamientoModel');
+const {
+    validarCampoNoVacio,
+    validarDuracion,
+    validarPrecio,
+    validarCitasRequeridas
+} = require('../utils/validations');
 const cloudinary = require('../utils/cloudinaryConfig');
 
 const crearTratamiento = async (req, res) => {
     try {
-        console.log('Datos recibidos:', req.body);
-
         const { nombre, descripcion, duracion_minutos, precio, tipo_citas, citas_requeridas } = req.body;
-        let imagen_url = '';
 
+        // Validaciones de los campos
+        const errores = [];
+
+        const errorNombre = validarCampoNoVacio(nombre, "Nombre");
+        if (errorNombre) errores.push(errorNombre);
+
+        const errorDescripcion = validarCampoNoVacio(descripcion, "Descripción");
+        if (errorDescripcion) errores.push(errorDescripcion);
+
+        const errorDuracion = validarDuracion(duracion_minutos);
+        if (errorDuracion) errores.push(errorDuracion);
+
+        if (tipo_citas !== 'requiere_evaluacion') {
+            const errorPrecio = validarPrecio(precio);
+            if (errorPrecio) errores.push(errorPrecio);
+
+            const errorCitasRequeridas = validarCitasRequeridas(citas_requeridas);
+            if (errorCitasRequeridas) errores.push(errorCitasRequeridas);
+        }
+
+        if (errores.length > 0) {
+            return res.status(400).json({ errores });
+        }
+
+        // Subida de imagen (si existe)
+        let imagen_url = '';
         if (req.file) {
-            console.log('Subiendo imagen a Cloudinary...');
             const resultado = await cloudinary.uploader.upload(req.file.path, { folder: 'tratamientos' });
             imagen_url = resultado.secure_url;
         }
@@ -30,7 +58,7 @@ const crearTratamiento = async (req, res) => {
         res.status(201).json({ mensaje: 'Tratamiento registrado con éxito.', id: tratamiento_id });
     } catch (error) {
         console.error('Error al registrar tratamiento:', error);
-        res.status(500).json({ mensaje: 'Error interno del servidor' });
+        res.status(500).json({ mensaje: 'Error interno del servidor.' });
     }
 };
 
