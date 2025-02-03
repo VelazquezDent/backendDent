@@ -1,4 +1,6 @@
 const db = require('../db');
+const { generarHash } = require('../../src/utils/hashUtils');
+
 
 const crearTratamiento = async (tratamientoData) => {
     const { nombre, descripcion, duracion_minutos, precio, citas_requeridas, requiere_evaluacion, imagen_url, estado } = tratamientoData;
@@ -28,4 +30,17 @@ const actualizarTratamiento = async (id, camposActualizados) => {
 
     await db.query(`UPDATE tratamientos SET ${campos} WHERE id = ?`, [...valores, id]);
 };
-module.exports = { crearTratamiento, obtenerTratamientos, actualizarEstadoTratamiento, actualizarTratamiento };
+const buscarTratamientos = async (search) => {
+    const [resultados] = await db.query(
+      `SELECT id, nombre FROM tratamientos WHERE nombre LIKE ?`,
+      [`%${search}%`]
+    );
+  
+    // Añadir el hash a cada resultado
+    return resultados.map((resultado) => ({
+      ...resultado,
+      hash: generarHash(resultado.id),
+    }));
+  };
+
+module.exports = { crearTratamiento, obtenerTratamientos, actualizarEstadoTratamiento, actualizarTratamiento,buscarTratamientos };

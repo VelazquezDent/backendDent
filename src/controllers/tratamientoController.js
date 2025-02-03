@@ -102,4 +102,22 @@ const actualizarTratamiento = async (req, res) => {
         res.status(500).json({ mensaje: "Error interno del servidor" });
     }
 };
-module.exports = { crearTratamiento, obtenerTratamientos,actualizarEstadoTratamiento, actualizarTratamiento };
+const buscarTratamientos = async (req, res) => {
+  try {
+    const { search } = req.query;
+
+    if (!search) {
+      return res.status(400).json({ mensaje: 'El término de búsqueda está vacío.' });
+    }
+
+    const resultados = await tratamientoModel.buscarTratamientos(search);
+
+    res.status(200).json(resultados);
+  } catch (error) {
+    console.error('Error en la búsqueda de tratamientos:', error);
+    res.status(500).json({ mensaje: 'Error interno del servidor' });
+  }
+};
+
+
+module.exports = { crearTratamiento, obtenerTratamientos, actualizarEstadoTratamiento, actualizarTratamiento, buscarTratamientos };
