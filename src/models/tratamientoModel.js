@@ -1,5 +1,5 @@
 const db = require('../db');
-const { generarHash } = require('../../src/utils/hashUtils');
+const { generarHash,verificarHash  } = require('../../src/utils/hashUtils');
 
 
 const crearTratamiento = async (tratamientoData) => {
@@ -42,5 +42,20 @@ const buscarTratamientos = async (search) => {
       hash: generarHash(resultado.id),
     }));
   };
+  const obtenerTratamientoPorHash = async (hash) => {
+    const [resultados] = await db.query(`SELECT * FROM tratamientos`);
 
-module.exports = { crearTratamiento, obtenerTratamientos, actualizarEstadoTratamiento, actualizarTratamiento,buscarTratamientos };
+    // Comparar el hash con cada tratamiento
+    const tratamiento = resultados.find((trat) => verificarHash(trat.id, hash));
+    return tratamiento || null;
+};
+
+module.exports = { 
+    
+    crearTratamiento, 
+    obtenerTratamientos, 
+    actualizarEstadoTratamiento, 
+    actualizarTratamiento,
+    buscarTratamientos, 
+    obtenerTratamientoPorHash
+};

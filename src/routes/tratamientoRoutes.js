@@ -12,5 +12,6 @@ router.get('/buscar', tratamientoController.buscarTratamientos);  // Nueva ruta
 router.put('/:id/estado', tratamientoController.actualizarEstadoTratamiento);
 router.put('/:id', tratamientoController.actualizarTratamiento);
 
+router.get('/:hash/detalle', tratamientoController.obtenerTratamientoPorHash);
 
 module.exports = router;

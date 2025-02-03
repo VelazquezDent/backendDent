@@ -6,6 +6,8 @@ const {
     validarCitasRequeridas
 } = require('../utils/validations');
 const cloudinary = require('../utils/cloudinaryConfig');
+const { verificarHash } = require('../../src/utils/hashUtils');
+
 
 const crearTratamiento = async (req, res) => {
     try {
@@ -118,6 +120,31 @@ const buscarTratamientos = async (req, res) => {
     res.status(500).json({ mensaje: 'Error interno del servidor' });
   }
 };
+const obtenerTratamientoPorHash = async (req, res) => {
+    try {
+        const { hash } = req.params;
+
+        // Obtener todos los tratamientos y buscar el que coincida con el hash
+        const tratamiento = await tratamientoModel.obtenerTratamientoPorHash(hash);
+
+        if (!tratamiento) {
+            return res.status(404).json({ mensaje: 'Tratamiento no encontrado.' });
+        }
+
+        res.status(200).json(tratamiento);
+    } catch (error) {
+        console.error('Error al obtener tratamiento por hash:', error);
+        res.status(500).json({ mensaje: 'Error interno del servidor' });
+    }
+};
 
 
-module.exports = { crearTratamiento, obtenerTratamientos, actualizarEstadoTratamiento, actualizarTratamiento, buscarTratamientos };
+module.exports = { 
+
+    crearTratamiento, 
+    obtenerTratamientos, 
+    actualizarEstadoTratamiento, 
+    actualizarTratamiento, 
+    buscarTratamientos,
+    obtenerTratamientoPorHash 
+};
