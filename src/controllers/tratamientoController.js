@@ -85,4 +85,21 @@ const actualizarEstadoTratamiento = async (req, res) => {
         res.status(500).json({ mensaje: 'Error interno del servidor' });
     }
 };
-module.exports = { crearTratamiento, obtenerTratamientos,actualizarEstadoTratamiento };
+const actualizarTratamiento = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { descripcion, duracion_minutos, precio, citas_requeridas } = req.body;
+
+        const camposActualizados = { descripcion, duracion_minutos };
+        if (precio !== undefined) camposActualizados.precio = precio;
+        if (citas_requeridas !== undefined) camposActualizados.citas_requeridas = citas_requeridas;
+
+        await tratamientoModel.actualizarTratamiento(id, camposActualizados);
+
+        res.status(200).json({ mensaje: "Tratamiento actualizado con éxito." });
+    } catch (error) {
+        console.error("Error al actualizar tratamiento:", error);
+        res.status(500).json({ mensaje: "Error interno del servidor" });
+    }
+};
+module.exports = { crearTratamiento, obtenerTratamientos,actualizarEstadoTratamiento, actualizarTratamiento };

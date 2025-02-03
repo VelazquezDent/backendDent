@@ -20,5 +20,12 @@ const obtenerTratamientos = async () => {
 const actualizarEstadoTratamiento = async (id, estado) => {
     await db.query(`UPDATE tratamientos SET estado = ? WHERE id = ?`, [estado, id]);
 };
+const actualizarTratamiento = async (id, camposActualizados) => {
+    const campos = Object.keys(camposActualizados)
+        .map((campo) => `${campo} = ?`)
+        .join(", ");
+    const valores = Object.values(camposActualizados);
 
-module.exports = { crearTratamiento, obtenerTratamientos, actualizarEstadoTratamiento };
+    await db.query(`UPDATE tratamientos SET ${campos} WHERE id = ?`, [...valores, id]);
+};
+module.exports = { crearTratamiento, obtenerTratamientos, actualizarEstadoTratamiento, actualizarTratamiento };

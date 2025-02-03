@@ -8,6 +8,7 @@ const upload = multer({ dest: 'uploads/' });
 router.post('/crear', upload.single('imagen'), tratamientoController.crearTratamiento);
 router.get('/', tratamientoController.obtenerTratamientos);
 router.put('/:id/estado', tratamientoController.actualizarEstadoTratamiento);
+router.put('/:id', tratamientoController.actualizarTratamiento);
 
 
 module.exports = router;
