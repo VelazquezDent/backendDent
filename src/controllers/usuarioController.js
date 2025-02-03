@@ -179,4 +179,77 @@ const loginUsuario = async (req, res) => {
         res.status(500).json({ mensaje: 'Error interno del servidor.' });
     }
 };
-module.exports = { registrarUsuario, verificarCodigo, loginUsuario };
+// Función para enviar el correo de recuperación de contraseña
+const enviarCorreoRecuperacion = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        // Buscar el usuario por email
+        const usuario = await userModel.obtenerUsuarioPorEmail(email);
+        if (!usuario) {
+            return res.status(404).json({ mensaje: 'Usuario no encontrado.' });
+        }
+
+        // Generar un token único y su expiración
+        const token = crypto.randomBytes(32).toString('hex');
+        const expiracion = new Date(Date.now() + 15 * 60 * 1000); // Expira en 15 minutos
+
+        // Guardar el token en la base de datos
+        await userModel.guardarTokenRecuperacion(usuario.id, token, expiracion);
+
+        // Enviar el correo con el enlace de recuperación
+        const enlaceRecuperacion = `http://localhost:5173/cambiar-password?token=${token}`;
+        await enviarCorreo(
+            email,
+            'Recuperación de contraseña',
+            `
+            <p>Hola ${usuario.nombre},</p>
+            <p>Haz solicitado recuperar tu contraseña. Haz clic en el siguiente enlace para cambiarla:</p>
+            <a href="${enlaceRecuperacion}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Cambiar contraseña</a>
+            <p>Este enlace es válido por 15 minutos.</p>
+            `
+        );
+
+        res.status(200).json({ mensaje: 'Correo enviado con éxito.' });
+    } catch (error) {
+        console.error('Error al enviar el correo de recuperación:', error);
+        res.status(500).json({ mensaje: 'Error interno del servidor.' });
+    }
+};
+
+// Función para cambiar la contraseña con validación del historial
+const cambiarPassword = async (req, res) => {
+    try {
+        const { token, nuevaPassword } = req.body;
+
+        // Verificar si el token es válido
+        const tokenData = await userModel.obtenerTokenRecuperacion(token);
+        if (!tokenData || new Date() > new Date(tokenData.expiracion)) {
+            return res.status(400).json({ mensaje: 'Token inválido o expirado.' });
+        }
+
+        // Verificar si la nueva contraseña ya fue utilizada en el historial
+        const yaUsada = await userModel.verificarPasswordEnHistorial(tokenData.usuario_id, nuevaPassword);
+        if (yaUsada) {
+            return res.status(409).json({ mensaje: 'Esta contraseña ya ha sido utilizada anteriormente.' });
+        }
+
+        // Hashear la nueva contraseña
+        const hashedPassword = await bcrypt.hash(nuevaPassword, 10);
+
+        // Actualizar la contraseña del usuario
+        await userModel.actualizarPassword(tokenData.usuario_id, hashedPassword);
+
+        // Marcar el token como usado
+        await userModel.marcarTokenUsado(token);
+
+        // Guardar la nueva contraseña en el historial
+        await userModel.guardarHistorialContrasena(tokenData.usuario_id, hashedPassword);
+
+        res.status(200).json({ mensaje: 'Contraseña actualizada con éxito.' });
+    } catch (error) {
+        console.error('Error al cambiar la contraseña:', error);
+        res.status(500).json({ mensaje: 'Error interno del servidor.' });
+    }
+};
+module.exports = { registrarUsuario, verificarCodigo, loginUsuario, enviarCorreoRecuperacion, cambiarPassword };

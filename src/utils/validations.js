@@ -22,11 +22,11 @@ const validarNombre = (nombre) => {
 
 // Valida un número telefónico
 const validarTelefono = (telefono) => {
-    const regex = /^[0-9]{10}$/;
+    const regex = /^[0-9]{10}(\.\d{1,2})?$/;  // Permite 10 dígitos y opcionalmente un punto con 1 o 2 decimales
     if (!telefono.trim()) {
         return "El teléfono no puede estar vacío.";
     } else if (!regex.test(telefono)) {
-        return "El teléfono debe tener exactamente 10 dígitos y solo números.";
+        return "El teléfono debe tener exactamente 10 dígitos, con opción de hasta dos decimales.";
     }
     return "";
 };
