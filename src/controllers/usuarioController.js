@@ -9,6 +9,7 @@ const {
 const { enviarCorreo } = require('../utils/mailer');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
+const { establecerCookieSesion, eliminarCookieSesion } = require('../utils/cookies');
 
 // Función para registrar un usuario
 const registrarUsuario = async (req, res) => {
@@ -105,8 +106,8 @@ const registrarUsuario = async (req, res) => {
     } catch (error) {
         if (error.code === 'ER_DUP_ENTRY') {
             return res.status(409).json({ mensaje: 'El correo ya está registrado. Por favor, usa otro.' });
-        } 
-        
+        }
+
         console.error('Error al registrar usuario:', error);
         res.status(500).json({ mensaje: 'Error interno del servidor.' });
     }
@@ -171,11 +172,23 @@ const loginUsuario = async (req, res) => {
         if (!esValida) {
             return res.status(401).json({ mensaje: 'Correo o contraseña incorrectos.' });
         }
-
+        // Establecer la cookie de sesión
+        establecerCookieSesion(res, usuario);
         // Enviar respuesta de éxito con un mensaje y el nombre del usuario
-        res.status(200).json({ mensaje: 'Inicio de sesión exitoso.', nombre: usuario.nombre });
+        res.status(200).json({ mensaje: 'Inicio de sesión exitoso.', nombre: usuario.nombre, tipo: usuario.tipo });
     } catch (error) {
         console.error('Error al autenticar usuario:', error);
+        res.status(500).json({ mensaje: 'Error interno del servidor.' });
+    }
+};
+
+// Función para cerrar sesión
+const logoutUsuario = (req, res) => {
+    try {
+        eliminarCookieSesion(res);
+        res.status(200).json({ mensaje: 'Sesión cerrada correctamente.' });
+    } catch (error) {
+        console.error('Error al cerrar sesión:', error);
         res.status(500).json({ mensaje: 'Error interno del servidor.' });
     }
 };
@@ -252,4 +265,13 @@ const cambiarPassword = async (req, res) => {
         res.status(500).json({ mensaje: 'Error interno del servidor.' });
     }
 };
-module.exports = { registrarUsuario, verificarCodigo, loginUsuario, enviarCorreoRecuperacion, cambiarPassword };
+const verificarSesion = (req, res) => {
+    try {
+        // `req.usuario` contiene los datos del usuario autenticado gracias al middleware
+        res.status(200).json({ usuario: req.usuario });
+    } catch (error) {
+        console.error('Error al verificar la sesión:', error);
+        res.status(500).json({ mensaje: 'Error al verificar la sesión.' });
+    }
+};
+module.exports = { registrarUsuario, verificarCodigo, loginUsuario, enviarCorreoRecuperacion, cambiarPassword,logoutUsuario,verificarSesion };

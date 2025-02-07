@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
+
 const usuarioRoutes = require('./routes/usuarioRoutes');
 const tratamientoRoutes = require('./routes/tratamientoRoutes');
 
@@ -8,6 +10,7 @@ const port = 4000;
 
 // Middleware para parsear JSON
 app.use(express.json());
+app.use(cookieParser());
 
 // Configuración de CORS
 app.use(
