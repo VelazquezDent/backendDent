@@ -7,6 +7,7 @@ const {
 } = require('../utils/validations');
 const cloudinary = require('../utils/cloudinaryConfig');
 const { verificarHash } = require('../../src/utils/hashUtils');
+const { subirImagen } = require('../utils/fileUploadConfig');
 
 
 const crearTratamiento = async (req, res) => {
@@ -37,11 +38,18 @@ const crearTratamiento = async (req, res) => {
             return res.status(400).json({ errores });
         }
 
+        
         // Subida de imagen (si existe)
         let imagen_url = '';
         if (req.file) {
-            const resultado = await cloudinary.uploader.upload(req.file.path, { folder: 'tratamientos' });
-            imagen_url = resultado.secure_url;
+            // Validar formato de la imagen
+            const allowedMimeTypes = ['image/jpeg', 'image/png'];
+            if (!allowedMimeTypes.includes(req.file.mimetype)) {
+                return res.status(400).json({ error: 'Formato de imagen no permitido. Solo se aceptan JPEG y PNG.' });
+            }
+
+            // Subir imagen a Hostinger
+            imagen_url = await subirImagen(req.file.path);
         }
 
         const requiere_evaluacion = tipo_citas === 'requiere_evaluacion' ? 1 : 0;
