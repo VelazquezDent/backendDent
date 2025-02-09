@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 // Llave secreta del token
-const JWT_SECRET = process.env.JWT_SECRET || 'secreto_super_seguro';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Configuración común para las cookies
 const cookieOptions = {

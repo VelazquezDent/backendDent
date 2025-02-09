@@ -1,11 +1,12 @@
 const axios = require('axios');
 const FormData = require('form-data');
+require('dotenv').config();
 
 // URL del endpoint en Hostinger
 const UPLOAD_URL = 'https://consultoriovelazquezmcd.com/upload_image.php';
 
 // Clave API para autenticar la solicitud
-const API_KEY = '1234567890abcdef';
+const API_KEY = process.env.UPLOAD_API_KEY;
 
 // Función para subir imágenes al servidor remoto
 const subirImagen = async (imagePath) => {

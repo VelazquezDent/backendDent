@@ -1,7 +1,8 @@
 const crypto = require('crypto');
+require('dotenv').config();
 
 // Clave secreta utilizada para el hash. Cámbiala por una clave única y segura.
-const secretKey = process.env.HASH_SECRET || 'Scr3tK3y'; 
+const secretKey = process.env.HASH_SECRET ; 
 
 // Función para generar el hash del ID
 const generarHash = (id) => {
