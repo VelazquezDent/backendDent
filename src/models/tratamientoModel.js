@@ -23,17 +23,38 @@ const actualizarEstadoTratamiento = async (id, estado) => {
     await db.query(`UPDATE tratamientos SET estado = ? WHERE id = ?`, [estado, id]);
 };
 const actualizarTratamiento = async (id, camposActualizados) => {
-    const campos = Object.keys(camposActualizados)
-        .map((campo) => `${campo} = ?`)
-        .join(", ");
-    const valores = Object.values(camposActualizados);
+    // Definimos los campos permitidos que se pueden actualizar
+    const camposPermitidos = [
+        'nombre',
+        'descripcion',
+        'duracion_minutos',
+        'precio',
+        'citas_requeridas',
+        'requiere_evaluacion',
+        'imagen',
+        'estado'
+    ];
 
-    await db.query(`UPDATE tratamientos SET ${campos} WHERE id = ?`, [...valores, id]);
+    // Filtramos los campos que no estén en la lista permitida
+    const camposValidos = Object.keys(camposActualizados).filter((campo) => camposPermitidos.includes(campo));
+
+    // Si no hay campos válidos, retornamos o lanzamos un error
+    if (camposValidos.length === 0) {
+        throw new Error('No hay campos válidos para actualizar');
+    }
+
+    // Construimos la consulta solo con los campos válidos
+    const camposQuery = camposValidos.map((campo) => `${campo} = ?`).join(", ");
+    const valores = camposValidos.map((campo) => camposActualizados[campo]);
+
+    // Ejecutamos la consulta parametrizada
+    await db.query(`UPDATE tratamientos SET ${camposQuery} WHERE id = ?`, [...valores, id]);
 };
+
 const buscarTratamientos = async (search) => {
     const [resultados] = await db.query(
-      `SELECT id, nombre FROM tratamientos WHERE nombre LIKE ?`,
-      [`%${search}%`]
+      `SELECT id, nombre FROM tratamientos WHERE nombre LIKE ? AND estado = ?`,
+      [`%${search}%`, 1]
     );
   
     // Añadir el hash a cada resultado
