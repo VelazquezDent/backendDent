@@ -15,7 +15,7 @@ app.use(cookieParser());
 // Configuración de CORS
 app.use(
   cors({
-    origin: ['http://localhost:5174','https://consultoriovelazquezmcd.com'], // Permite peticiones desde esta URL
+    origin: ['http://localhost:5173','https://consultoriovelazquezmcd.com'], // Permite peticiones desde esta URL
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
     credentials: true, // Permitir el envío de cookies y encabezados de autenticación
   })

@@ -139,7 +139,6 @@ const verificarCodigo = async (req, res) => {
     }
 };
 // Función para manejar el login del usuario
-// Función para manejar el login del usuario
 const loginUsuario = async (req, res) => {
     try {
         const { email, password } = req.body;
