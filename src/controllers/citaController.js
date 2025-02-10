@@ -12,11 +12,15 @@ exports.crearCitas = async (req, res) => {
             citas.push([tratamientoPacienteId, null, 'pendiente', 0]);
         }
 
-        await citaModel.crearCitas(citas);
+        // Insertar las citas en la base de datos
+        const resultado = await citaModel.crearCitas(citas);
 
-        res.status(201).json({ mensaje: 'Citas creadas exitosamente' });
+        // Recuperar las citas creadas (puedes ajustar esto según cómo estés manejando los IDs)
+        const citasCreadas = await citaModel.obtenerCitasPorTratamiento(tratamientoPacienteId);
+
+        res.status(201).json({ mensaje: 'Citas creadas exitosamente', citas: citasCreadas });
     } catch (error) {
-        console.error(error);
+        console.error('Error al crear las citas:', error);
         res.status(500).json({ mensaje: 'Error al crear las citas' });
     }
 };

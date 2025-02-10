@@ -6,6 +6,7 @@ const usuarioRoutes = require('./routes/usuarioRoutes');
 const tratamientoRoutes = require('./routes/tratamientoRoutes');
 const citaRoutes = require('./routes/citaRoutes');
 const tratamientoPacienteRoutes = require('./routes/tratamientoPacienteRoutes');
+const pagoRoutes = require('./routes/pagoRoutes');
 
 const app = express();
 const port = 4000;
@@ -28,6 +29,7 @@ app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/tratamientos', tratamientoRoutes);
 app.use('/api/citas', citaRoutes);
 app.use('/api/tratamientos-pacientes', tratamientoPacienteRoutes);
+app.use('/api/pagos', pagoRoutes);
 // Iniciar el servidor
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
