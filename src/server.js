@@ -4,6 +4,8 @@ const cookieParser = require('cookie-parser');
 
 const usuarioRoutes = require('./routes/usuarioRoutes');
 const tratamientoRoutes = require('./routes/tratamientoRoutes');
+const citaRoutes = require('./routes/citaRoutes');
+const tratamientoPacienteRoutes = require('./routes/tratamientoPacienteRoutes');
 
 const app = express();
 const port = 4000;
@@ -24,6 +26,8 @@ app.use(
 // Rutas
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/tratamientos', tratamientoRoutes);
+app.use('/api/citas', citaRoutes);
+app.use('/api/tratamientos-pacientes', tratamientoPacienteRoutes);
 // Iniciar el servidor
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
