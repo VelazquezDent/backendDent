@@ -6,9 +6,9 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 // Configuración común para las cookies
 const cookieOptions = {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === 'lax',
-    sameSite: process.env.NODE_ENV ===  'Lax',
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
     path: '/',
 };
 
