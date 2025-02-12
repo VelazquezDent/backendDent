@@ -8,8 +8,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-    domain: 'consultoriovelazquezmcd.com',  // Establecer dominio del frontend
+    sameSite: process.env.NODE_ENV ===  'None',
     path: '/',
 };
 
