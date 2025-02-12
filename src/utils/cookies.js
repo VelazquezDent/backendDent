@@ -9,7 +9,7 @@ const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-    domain: '.consultoriovelazquezmcd.com',  // Establecer dominio del frontend
+    domain: 'consultoriovelazquezmcd.com',  // Establecer dominio del frontend
     path: '/',
 };
 
