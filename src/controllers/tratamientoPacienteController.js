@@ -57,3 +57,12 @@ exports.crearTratamientoCompleto = async (req, res) => {
         res.status(500).json({ mensaje: 'Error al crear el tratamiento completo' });
     }
 };
+exports.obtenerTratamientosEnProgreso = async (req, res) => {
+    try {
+        const tratamientos = await tratamientoPacienteModel.obtenerTratamientosEnProgreso();
+        res.status(200).json(tratamientos);
+    } catch (error) {
+        console.error('Error al obtener tratamientos en progreso:', error);
+        res.status(500).json({ mensaje: 'Error al obtener tratamientos en progreso' });
+    }
+};
