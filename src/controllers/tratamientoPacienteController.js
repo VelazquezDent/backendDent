@@ -66,3 +66,12 @@ exports.obtenerTratamientosEnProgreso = async (req, res) => {
         res.status(500).json({ mensaje: 'Error al obtener tratamientos en progreso' });
     }
 };
+exports.obtenerTratamientosPendientes = async (req, res) => {
+    try {
+        const tratamientos = await tratamientoPacienteModel.obtenerTratamientosPendientes();
+        res.status(200).json(tratamientos);
+    } catch (error) {
+        console.error('Error al obtener tratamientos pendientes:', error);
+        res.status(500).json({ mensaje: 'Error al obtener tratamientos pendientes' });
+    }
+};

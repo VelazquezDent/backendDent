@@ -6,5 +6,7 @@ const tratamientoPacienteController = require('../controllers/tratamientoPacient
 router.post('/crear', tratamientoPacienteController.crearTratamientoCompleto);
 // Ruta para obtener tratamientos en progreso
 router.get('/en-progreso', tratamientoPacienteController.obtenerTratamientosEnProgreso);
+router.get('/pendientes', tratamientoPacienteController.obtenerTratamientosPendientes);
+
 
 module.exports = router;
