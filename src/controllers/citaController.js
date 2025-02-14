@@ -24,3 +24,13 @@ exports.crearCitas = async (req, res) => {
         res.status(500).json({ mensaje: 'Error al crear las citas' });
     }
 };
+exports.obtenerCitasPorUsuario = async (req, res) => {
+    try {
+        const { usuarioId } = req.params;
+        const citas = await citaModel.obtenerCitasPorUsuario(usuarioId);
+        res.status(200).json(citas);
+    } catch (error) {
+        console.error('Error al obtener citas del usuario:', error);
+        res.status(500).json({ mensaje: 'Error al obtener citas del usuario' });
+    }
+};
