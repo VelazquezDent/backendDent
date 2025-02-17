@@ -34,3 +34,12 @@ exports.obtenerCitasPorUsuario = async (req, res) => {
         res.status(500).json({ mensaje: 'Error al obtener citas del usuario' });
     }
 };
+exports.obtenerProximasCitas = async (req, res) => {
+    try {
+        const citas = await citaModel.obtenerProximasCitas();
+        res.status(200).json(citas);
+    } catch (error) {
+        console.error('Error al obtener las próximas citas:', error);
+        res.status(500).json({ mensaje: 'Error al obtener las próximas citas' });
+    }
+};

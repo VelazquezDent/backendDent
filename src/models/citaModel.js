@@ -50,4 +50,49 @@ exports.obtenerCitasPorUsuario = async (usuarioId) => {
         estado_cita: cita.estado_cita // Mantener NULL si está en la BD
     }));
 };
+exports.obtenerProximasCitas = async () => {
+    const query = `
+        SELECT 
+            c.id AS cita_id,
+            c.fecha_hora,
+            COALESCE(c.estado, NULL) AS estado_cita,
+            CASE 
+                WHEN c.pagada = 1 THEN 'Pagado'
+                ELSE 'No pagado'
+            END AS estado_pago,
+            
+            -- Agregamos el nombre del tratamiento
+            t.nombre AS nombre_tratamiento,
+
+            -- Datos del paciente
+            CASE 
+                WHEN tp.usuario_id IS NOT NULL THEN u.nombre
+                ELSE p.nombre
+            END AS nombre,
+            CASE 
+                WHEN tp.usuario_id IS NOT NULL THEN u.apellido_paterno
+                ELSE p.apellido_paterno
+            END AS apellido_paterno,
+            CASE 
+                WHEN tp.usuario_id IS NOT NULL THEN u.email
+                ELSE p.email
+            END AS email,
+            CASE 
+                WHEN tp.usuario_id IS NOT NULL THEN u.telefono
+                ELSE p.telefono
+            END AS telefono
+
+        FROM citas c
+        JOIN tratamientos_pacientes tp ON c.tratamiento_paciente_id = tp.id
+        JOIN tratamientos t ON tp.tratamiento_id = t.id  -- 🔹 JOIN para obtener el tratamiento
+        LEFT JOIN usuarios u ON tp.usuario_id = u.id
+        LEFT JOIN pacientes_sin_plataforma p ON tp.paciente_id = p.id
+        WHERE c.fecha_hora IS NOT NULL 
+        ORDER BY c.fecha_hora ASC;
+    `;
+
+    const [citas] = await db.execute(query);
+    return citas;
+};
+
 
