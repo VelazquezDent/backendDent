@@ -45,6 +45,18 @@ const registrarUsuario = async (req, res) => {
         if (errores.length > 0) {
             return res.status(400).json({ errores });
         }
+          // Verificar si el correo ya está registrado
+          const usuarioExistentePorCorreo = await userModel.obtenerUsuarioPorEmail(email);
+          if (usuarioExistentePorCorreo) {
+              return res.status(409).json({ mensaje: 'El correo ya está registrado. Usa otro correo electrónico.' });
+          }
+  
+          // Verificar si el teléfono ya está registrado
+          const usuarioExistentePorTelefono = await userModel.obtenerUsuarioPorTelefono(telefono);
+          if (usuarioExistentePorTelefono) {
+              return res.status(409).json({ mensaje: 'El teléfono ya está registrado. Usa otro número de teléfono.' });
+          }
+  
 
         // Hashear la contraseña
         const hashedPassword = await bcrypt.hash(password, 10);

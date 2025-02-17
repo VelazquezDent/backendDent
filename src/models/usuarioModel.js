@@ -104,6 +104,12 @@ const verificarPasswordEnHistorial = async (usuario_id, nuevaPassword) => {
 };
 
 
+// Verificar si un usuario ya existe por teléfono
+const obtenerUsuarioPorTelefono = async (telefono) => {
+    const [result] = await db.query('SELECT * FROM usuarios WHERE telefono = ?', [telefono]);
+    return result.length ? result[0] : null;
+};
+
 
 module.exports = {
     crearUsuario,
@@ -116,5 +122,6 @@ module.exports = {
     marcarTokenUsado,
     verificarPasswordEnHistorial,
     obtenerHistorialContrasenas,
-    actualizarPassword
+    actualizarPassword,
+    obtenerUsuarioPorTelefono
 };
