@@ -24,9 +24,9 @@ exports.crearTratamientoCompleto = async (req, res) => {
         }
 
         // 2. Crear las citas asociadas
-        const citas = [[tratamientoPacienteId, fechaInicio, 'pendiente', 0]];
+        const citas = [[tratamientoPacienteId, fechaInicio, null, 0]];
         for (let i = 1; i < citasTotales; i++) {
-            citas.push([tratamientoPacienteId, null, 'pendiente', 0]);
+            citas.push([tratamientoPacienteId, null, null, 0]);
         }
 
         await citaModel.crearCitas(citas);
