@@ -6,10 +6,11 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 // Configuración común para las cookies
 const cookieOptions = {
-    httpOnly: false,
-    secure: false,
-    sameSite: 'Lax',
+    httpOnly: true,  // La cookie solo se puede acceder desde el servidor
+    secure: true,    // Solo se envía en HTTPS
+    sameSite: 'None', // Permitir compartir entre distintos dominios
     path: '/',
+    domain: '.consultoriovelazquezmcd.com', // Usar dominio de Hostinger
 };
 
 // **Función para generar y establecer la cookie de sesión**
