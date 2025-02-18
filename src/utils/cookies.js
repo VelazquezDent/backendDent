@@ -10,7 +10,7 @@ const cookieOptions = {
     secure: true,    // Solo se envía en HTTPS
     sameSite: 'None', // Permitir compartir entre distintos dominios
     path: '/',
-    domain: '.consultoriovelazquezmcd.com', // Usar dominio de Hostinger
+    domain: 'consultoriovelazquezmcd.com', // Usar dominio de Hostinger
 };
 
 // **Función para generar y establecer la cookie de sesión**
