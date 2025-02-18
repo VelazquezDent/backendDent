@@ -127,3 +127,34 @@ exports.obtenerTratamientosPendientes = async (req, res) => {
         res.status(500).json({ mensaje: 'Error al obtener tratamientos pendientes' });
     }
 };
+exports.verificarTratamientoActivo = async (req, res) => {
+    const { usuarioId } = req.params;
+
+    try {
+        // 1️⃣ Verificar si el usuario tiene un tratamiento activo
+        const tratamientoActivo = await tratamientoPacienteModel.tieneTratamientoActivo(usuarioId);
+
+        if (tratamientoActivo) {
+            return res.status(200).json({
+                tieneTratamientoActivo: true,
+                mensaje: "El usuario ya tiene un tratamiento activo.",
+                tratamiento: tratamientoActivo
+            });
+        }
+
+        // 2️⃣ Verificar si el usuario ha completado un tratamiento anteriormente
+        const haCompletado = await tratamientoPacienteModel.haCompletadoTratamiento(usuarioId);
+
+        res.status(200).json({
+            tieneTratamientoActivo: false,
+            puedeCrearNuevo: haCompletado,
+            mensaje: haCompletado 
+                ? "El usuario ya ha completado un tratamiento y puede crear uno nuevo."
+                : "El usuario no tiene registros de tratamientos."
+        });
+
+    } catch (error) {
+        console.error("❌ Error al verificar tratamiento activo:", error);
+        res.status(500).json({ mensaje: "Error al verificar el tratamiento activo." });
+    }
+};

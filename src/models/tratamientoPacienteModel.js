@@ -63,3 +63,20 @@ exports.obtenerTratamientosPendientes = async () => {
     const [rows] = await db.query(query, values);
     return rows;
 };
+exports.tieneTratamientoActivo = async (usuarioId) => {
+    const query = `
+        SELECT id, estado FROM tratamientos_pacientes 
+        WHERE usuario_id = ? AND estado IN ('en progreso', 'pendiente')
+    `;
+    const [rows] = await db.query(query, [usuarioId]);
+    return rows.length > 0 ? rows[0] : null;
+};
+
+exports.haCompletadoTratamiento = async (usuarioId) => {
+    const query = `
+        SELECT id FROM tratamientos_pacientes 
+        WHERE usuario_id = ? AND estado = 'terminado'
+    `;
+    const [rows] = await db.query(query, [usuarioId]);
+    return rows.length > 0;
+};
