@@ -1,21 +1,43 @@
 const db = require('../db');
 
-exports.crearCitas = async (citas) => {
+exports.crearCita = async (cita, connection) => {
+    const query = `INSERT INTO citas (tratamiento_paciente_id, fecha_hora, estado, pagada) VALUES (?, ?, ?, ?)`;
+    
+    const values = [
+        cita.tratamientoPacienteId,
+        cita.fechaHora,
+        cita.estado,
+        cita.pagada
+    ];
+
+    const [result] = await connection.query(query, values);
+    return { id: result.insertId, ...cita };
+};
+
+exports.crearCitas = async (citas, connection) => {
+    if (!citas || citas.length === 0) {
+        console.warn("⚠️ No hay citas para insertar.");
+        return;
+    }
+
     const query = `INSERT INTO citas (tratamiento_paciente_id, fecha_hora, estado, pagada) VALUES ?`;
     
     const values = citas.map(cita => [
-        cita[0], // tratamiento_paciente_id
-        cita[1], // fecha_hora
-        null,    // Estado debe ser NULL
-        cita[3]  // Pagada
+        cita.tratamientoPacienteId,
+        cita.fechaHora,
+        cita.estado,
+        cita.pagada
     ]);
 
-    await db.query(query, [values]);
+    await connection.query(query, [values]);
+    console.log(`✔️ Se insertaron ${citas.length} citas.`);
 };
 
-exports.obtenerCitasPorTratamiento = async (tratamientoPacienteId) => {
+exports.obtenerCitasPorTratamiento = async (tratamientoPacienteId, connection) => {
     const query = `SELECT * FROM citas WHERE tratamiento_paciente_id = ?`;
-    const [rows] = await db.query(query, [tratamientoPacienteId]);
+    const [rows] = await connection.query(query, [tratamientoPacienteId]);
+
+    console.log("📌 Citas recuperadas en obtenerCitasPorTratamiento:", rows);
     return rows;
 };
 exports.obtenerCitasPorUsuario = async (usuarioId) => {

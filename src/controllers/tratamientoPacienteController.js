@@ -1,62 +1,114 @@
+const db = require('../db'); // 🔹 Importar la conexión a la base de datos
 const tratamientoPacienteModel = require('../models/tratamientoPacienteModel');
 const citaModel = require('../models/citaModel');
 const pagoModel = require('../models/pagoModel');
 
 exports.crearTratamientoCompleto = async (req, res) => {
-    try {
-        const { usuarioId, tratamientoId, citasTotales, fechaInicio, estado, precio, requiereEvaluacion } = req.body;
+    const connection = await db.getConnection();
+    await connection.beginTransaction();
 
-        // 1. Crear el tratamiento del paciente
+    try {
+        const { usuarioId, tratamientoId, citasTotales, fechaInicio, precio, requiereEvaluacion } = req.body;
+
+        console.log("📌 Iniciando creación de tratamiento...");
+
+        // 1️⃣ **Crear el tratamiento del paciente**
         const tratamientoPacienteId = await tratamientoPacienteModel.crearTratamientoPaciente({
             usuarioId,
             tratamientoId,
-            citasTotales,
+            citasTotales: requiereEvaluacion ? 0 : citasTotales,
+            citasAsistidas: 0,
             fechaInicio,
-            estado
-        });
+            estado: requiereEvaluacion ? 'pendiente' : 'en progreso'
+        }, connection);
 
-        // Si el tratamiento requiere evaluación, no se crean citas ni pagos
-        if (requiereEvaluacion) {
-            return res.status(201).json({
-                mensaje: 'Tratamiento creado exitosamente, pendiente de evaluación.',
-                tratamientoPacienteId
-            });
-        }
+        console.log(`✔️ Tratamiento creado con ID: ${tratamientoPacienteId}`);
 
-        // 2. Crear las citas asociadas
-        const citas = [[tratamientoPacienteId, fechaInicio, null, 0]];
-        for (let i = 1; i < citasTotales; i++) {
-            citas.push([tratamientoPacienteId, null, null, 0]);
-        }
+        // 2️⃣ **Crear la primera cita**
+        const primeraCita = await citaModel.crearCita({
+            tratamientoPacienteId,
+            fechaHora: fechaInicio,
+            estado: 'pendiente',
+            pagada: 0
+        }, connection);
 
-        await citaModel.crearCitas(citas);
+        console.log(`✔️ Primera cita creada con ID: ${primeraCita.id}`);
 
-        // 3. Obtener las citas creadas
-        const citasCreadas = await citaModel.obtenerCitasPorTratamiento(tratamientoPacienteId);
-
-        // 4. Crear los pagos asociados
-        const pagos = citasCreadas.map(cita => [
+        // 3️⃣ **Crear el pago para la primera cita**
+        const primerPago = {
             usuarioId,
-            null,  // pacienteId es opcional
-            cita.id,
-            precio,
-            null,  // Método de pago será nulo inicialmente
-            'pendiente',
-            null  // Fecha de pago estará inicialmente en null
-        ]);
+            pacienteId: null,
+            citaId: primeraCita.id,
+            monto: precio,
+            metodo: null,
+            estado: 'pendiente',
+            fechaPago: null
+        };
 
-        await pagoModel.crearPagos(pagos);
+        await pagoModel.crearPago(primerPago, connection);
+        console.log(`✔️ Primer pago registrado para la cita ID: ${primeraCita.id}`);
 
-        // 5. Responder con éxito
+        // 4️⃣ **Si el tratamiento NO requiere evaluación, generar citas y pagos restantes**
+        if (!requiereEvaluacion) {
+            let citasRestantes = [];
+            for (let i = 1; i < citasTotales; i++) {
+                citasRestantes.push({
+                    tratamientoPacienteId,
+                    fechaHora: null,
+                    estado: 'pendiente',
+                    pagada: 0
+                });
+            }
+
+            await citaModel.crearCitas(citasRestantes, connection);
+            console.log(`✔️ ${citasRestantes.length} citas adicionales creadas.`);
+
+            // 🔹 Obtener todas las citas creadas (incluye la primera)
+            const citasCreadas = await citaModel.obtenerCitasPorTratamiento(tratamientoPacienteId, connection);
+
+            // **Excluir la primera cita para evitar pagos duplicados**
+            const citasRestantesConPago = citasCreadas.filter(cita => cita.id !== primeraCita.id);
+
+            console.log("📌 Citas obtenidas para pagos (excluyendo la primera):", citasRestantesConPago);
+
+            if (citasRestantesConPago.length > 0) {
+                const pagos = citasRestantesConPago.map(cita => ({
+                    usuarioId,
+                    pacienteId: null,
+                    citaId: cita.id,
+                    monto: precio,
+                    metodo: null,
+                    estado: 'pendiente',
+                    fechaPago: null
+                }));
+
+                console.log("📌 Pagos a insertar:", pagos);
+
+                await pagoModel.crearPagos(pagos, connection);
+            } else {
+                console.warn("⚠️ No se encontraron citas restantes para generar pagos.");
+            }
+        }
+
+        // 5️⃣ **Confirmar la transacción**
+        await connection.commit();
+
         res.status(201).json({
-            mensaje: 'Tratamiento, citas y pagos creados exitosamente',
+            mensaje: requiereEvaluacion
+                ? 'Tratamiento creado con cita de evaluación y un pago asociado. El médico determinará cuántas citas necesitas.'
+                : 'Tratamiento, citas y pagos creados exitosamente',
             tratamientoPacienteId
         });
+
     } catch (error) {
+        await connection.rollback();
         console.error('Error al crear el tratamiento completo:', error);
         res.status(500).json({ mensaje: 'Error al crear el tratamiento completo' });
+    } finally {
+        connection.release();
     }
 };
+
 exports.obtenerTratamientosEnProgreso = async (req, res) => {
     try {
         const tratamientos = await tratamientoPacienteModel.obtenerTratamientosEnProgreso();
