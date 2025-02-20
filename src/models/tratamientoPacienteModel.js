@@ -80,3 +80,17 @@ exports.haCompletadoTratamiento = async (usuarioId) => {
     const [rows] = await db.query(query, [usuarioId]);
     return rows.length > 0;
 };
+exports.obtenerTratamientosActivosPorUsuario = async (usuarioId) => {
+    const query = `
+        SELECT tp.id, u.nombre, u.apellido_paterno, u.apellido_materno, t.nombre AS tratamiento_nombre, 
+               tp.citas_totales, tp.citas_asistidas, tp.estado, 
+               DATE_FORMAT(tp.fecha_inicio, '%Y-%m-%d') AS fecha_inicio, 
+               DATE_FORMAT(tp.fecha_finalizacion, '%Y-%m-%d') AS fecha_finalizacion
+        FROM tratamientos_pacientes tp
+        JOIN usuarios u ON tp.usuario_id = u.id
+        JOIN tratamientos t ON tp.tratamiento_id = t.id
+        WHERE tp.usuario_id = ? AND tp.estado IN ('en progreso', 'pendiente');
+    `;
+    const [rows] = await db.query(query, [usuarioId]);
+    return rows;
+};

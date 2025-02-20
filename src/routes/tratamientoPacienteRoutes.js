@@ -9,6 +9,8 @@ router.get('/en-progreso', tratamientoPacienteController.obtenerTratamientosEnPr
 router.get('/pendientes', tratamientoPacienteController.obtenerTratamientosPendientes);
 // Nueva ruta para verificar si un usuario tiene un tratamiento activo
 router.get('/verificar/:usuarioId', tratamientoPacienteController.verificarTratamientoActivo);
+// Nuevo endpoint para obtener tratamientos activos por usuarioId
+router.get("/activo/:usuarioId", tratamientoPacienteController.obtenerTratamientosActivosPorUsuario);
 
 
 module.exports = router;

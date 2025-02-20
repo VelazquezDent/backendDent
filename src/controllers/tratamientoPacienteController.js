@@ -158,3 +158,25 @@ exports.verificarTratamientoActivo = async (req, res) => {
         res.status(500).json({ mensaje: "Error al verificar el tratamiento activo." });
     }
 };
+exports.obtenerTratamientosActivosPorUsuario = async (req, res) => {
+    const { usuarioId } = req.params;
+
+    try {
+        // Validar que el usuarioId sea un número válido
+        if (isNaN(usuarioId)) {
+            return res.status(400).json({ mensaje: "El usuarioId no es válido." });
+        }
+
+        // Obtener tratamientos activos (en progreso o pendiente) para el usuario
+        const tratamientos = await tratamientoPacienteModel.obtenerTratamientosActivosPorUsuario(usuarioId);
+
+        if (tratamientos.length === 0) {
+            return res.status(200).json({ mensaje: "No hay tratamientos activos para este usuario.", tratamientos: [] });
+        }
+
+        res.status(200).json(tratamientos);
+    } catch (error) {
+        console.error("Error al obtener tratamientos activos:", error);
+        res.status(500).json({ mensaje: "Error al obtener tratamientos activos." });
+    }
+};
