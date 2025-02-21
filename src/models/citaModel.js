@@ -116,5 +116,19 @@ exports.obtenerProximasCitas = async () => {
     const [citas] = await db.execute(query);
     return citas;
 };
+exports.obtenerCitasActivas = async () => {
+    const query = `
+        SELECT 
+            fecha_hora, 
+            estado
+            FROM citas
+        WHERE estado = 'pendiente'
+        AND fecha_hora IS NOT NULL
+        ORDER BY fecha_hora ASC;
+    `;
+
+    const [citas] = await db.execute(query);
+    return citas;
+};
 
 

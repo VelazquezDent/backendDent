@@ -9,4 +9,6 @@ router.get('/usuario/:usuarioId', citaController.obtenerCitasPorUsuario);
 
 // Ruta para obtener las próximas citas (estado NULL y con fecha definida)
 router.get('/proximas', citaController.obtenerProximasCitas);
+router.get('/activas', citaController.obtenerCitasActivas);
+
 module.exports = router;

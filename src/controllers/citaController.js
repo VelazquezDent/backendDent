@@ -43,3 +43,12 @@ exports.obtenerProximasCitas = async (req, res) => {
         res.status(500).json({ mensaje: 'Error al obtener las próximas citas' });
     }
 };
+exports.obtenerCitasActivas = async (req, res) => {
+    try {
+        const citas = await citaModel.obtenerCitasActivas();
+        res.status(200).json(citas);
+    } catch (error) {
+        console.error('Error al obtener citas activas:', error);
+        res.status(500).json({ mensaje: 'Error al obtener citas activas' });
+    }
+};
