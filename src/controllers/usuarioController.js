@@ -14,7 +14,7 @@ const { establecerCookieSesion, eliminarCookieSesion } = require('../utils/cooki
 // Función para registrar un usuario
 const registrarUsuario = async (req, res) => {
     try {
-        const { nombre, apellido_paterno, apellido_materno, telefono, edad, sexo, email, password, repetir_password } = req.body;
+        const { nombre, apellido_paterno, apellido_materno, telefono, fecha_nacimiento, sexo, email, password, repetir_password } = req.body;
 
         // Validaciones de datos
         const errores = [];
@@ -28,8 +28,10 @@ const registrarUsuario = async (req, res) => {
         const errorTelefono = validarTelefono(telefono);
         if (errorTelefono) errores.push(errorTelefono);
 
-        const errorEdad = validarEdad(edad);
-        if (errorEdad) errores.push(errorEdad);
+        if (!fecha_nacimiento || new Date(fecha_nacimiento) > new Date()) {
+            errores.push("Fecha de nacimiento inválida.");
+        }
+        
 
         const errorCorreo = validarCorreo(email);
         if (errorCorreo) errores.push(errorCorreo);
@@ -70,7 +72,7 @@ const registrarUsuario = async (req, res) => {
             apellido_paterno,
             apellido_materno,
             telefono,
-            edad,
+            fecha_nacimiento,
             sexo,
             email,
             hashedPassword,

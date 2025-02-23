@@ -4,16 +4,17 @@ const bcrypt = require('bcrypt');
 
 // Función para crear un usuario en la base de datos
 const crearUsuario = async (usuarioData) => {
-    const { nombre, apellido_paterno, apellido_materno, telefono, edad, sexo, email, hashedPassword, codigo_verificacion } = usuarioData;
+    const { nombre, apellido_paterno, apellido_materno, telefono, fecha_nacimiento, sexo, email, hashedPassword, codigo_verificacion } = usuarioData;
 
     const [result] = await db.query(
-        `INSERT INTO usuarios (nombre, apellido_paterno, apellido_materno, telefono, edad, sexo, email, password, tipo, verificado, codigo_verificacion, expiracion_codigo_verificacion) 
+        `INSERT INTO usuarios (nombre, apellido_paterno, apellido_materno, telefono, fecha_nacimiento, sexo, email, password, tipo, verificado, codigo_verificacion, expiracion_codigo_verificacion) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'paciente', 0, ?, DATE_ADD(NOW(), INTERVAL 5 MINUTE))`,
-        [nombre, apellido_paterno, apellido_materno, telefono, edad, sexo, email, hashedPassword, codigo_verificacion]
+        [nombre, apellido_paterno, apellido_materno, telefono, fecha_nacimiento, sexo, email, hashedPassword, codigo_verificacion]
     );
 
-    return result.insertId;  // Devolver el ID del nuevo usuario
+    return result.insertId;
 };
+
 
 // Función para registrar la contraseña en el historial
 const guardarHistorialContrasena = async (usuario_id, hashedPassword) => {
