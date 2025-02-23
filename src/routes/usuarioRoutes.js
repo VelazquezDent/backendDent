@@ -21,5 +21,7 @@ router.post('/cambiar-password', usuarioController.cambiarPassword);
 
 // Ruta para verificar la sesión (protegida)
 router.get('/verificar-sesion', autenticarUsuario(), usuarioController.verificarSesion);
+// Endpoint para buscar usuario
+router.post('/buscar', usuarioController.buscarUsuario);
 
 module.exports = router;

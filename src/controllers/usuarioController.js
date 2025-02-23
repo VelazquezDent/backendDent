@@ -287,4 +287,29 @@ const verificarSesion = (req, res) => {
         res.status(500).json({ mensaje: 'Error al verificar la sesión.' });
     }
 };
-module.exports = { registrarUsuario, verificarCodigo, loginUsuario, enviarCorreoRecuperacion, cambiarPassword,logoutUsuario,verificarSesion };
+const buscarUsuario = async (req, res) => {
+    try {
+        const { nombre, apellido_paterno, apellido_materno, fecha_nacimiento, email, telefono } = req.body;
+
+        if (!nombre || !apellido_paterno || !apellido_materno || !fecha_nacimiento) {
+            return res.status(400).json({ mensaje: "Los campos nombre, apellido_paterno, apellido_materno y fecha_nacimiento son obligatorios." });
+        }
+
+        // Buscar en ambas tablas
+        const usuarios = await userModel.buscarEnUsuarios(nombre, apellido_paterno, apellido_materno, fecha_nacimiento, email, telefono);
+        const pacientes = await userModel.buscarEnPacientesSinPlataforma(nombre, apellido_paterno, apellido_materno, fecha_nacimiento, email, telefono);
+
+        const resultados = [...usuarios, ...pacientes];
+
+        if (resultados.length === 0) {
+            return res.status(404).json({ mensaje: "No se encontró ningún usuario con esos datos." });
+        }
+
+        res.status(200).json(resultados);
+    } catch (error) {
+        console.error("Error al buscar usuario:", error);
+        res.status(500).json({ mensaje: "Error interno del servidor." });
+    }
+};
+
+module.exports = { buscarUsuario, registrarUsuario, verificarCodigo, loginUsuario, enviarCorreoRecuperacion, cambiarPassword,logoutUsuario,verificarSesion };
