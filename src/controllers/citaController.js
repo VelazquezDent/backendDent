@@ -52,3 +52,13 @@ exports.obtenerCitasActivas = async (req, res) => {
         res.status(500).json({ mensaje: 'Error al obtener citas activas' });
     }
 };
+exports.obtenerCitasPorTratamiento = async (req, res) => {
+    try {
+        const { tratamientoPacienteId } = req.params;
+        const citas = await citaModel.obtenerCitasPorTratamiento(tratamientoPacienteId);
+        res.status(200).json(citas);
+    } catch (error) {
+        console.error('Error al obtener citas del tratamiento:', error);
+        res.status(500).json({ mensaje: 'Error al obtener citas del tratamiento' });
+    }
+};

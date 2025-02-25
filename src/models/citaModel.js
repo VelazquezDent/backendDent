@@ -130,5 +130,18 @@ exports.obtenerCitasActivas = async () => {
     const [citas] = await db.execute(query);
     return citas;
 };
-
-
+exports.obtenerCitasPorTratamiento = async (tratamientoPacienteId) => {
+    const query = `
+        SELECT * 
+        FROM citas 
+        WHERE tratamiento_paciente_id = ? 
+        ORDER BY 
+            CASE 
+                WHEN fecha_hora IS NULL THEN 1 ELSE 0 
+            END, 
+            fecha_hora ASC, 
+            id ASC
+    `;
+    const [rows] = await db.execute(query, [tratamientoPacienteId]);
+    return rows;
+};
