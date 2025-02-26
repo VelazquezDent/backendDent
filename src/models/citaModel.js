@@ -145,3 +145,27 @@ exports.obtenerCitasPorTratamiento = async (tratamientoPacienteId) => {
     const [rows] = await db.execute(query, [tratamientoPacienteId]);
     return rows;
 };
+exports.crearNuevasCitas = async (citas, connection) => {
+    if (!citas || citas.length === 0) {
+        console.warn("⚠️ No hay citas para insertar.");
+        return;
+    }
+
+    const query = `INSERT INTO citas (tratamiento_paciente_id, fecha_hora, estado, pagada) VALUES ?`;
+    
+    const values = citas.map(cita => [
+        cita.tratamientoPacienteId,
+        cita.fechaHora,
+        cita.estado,
+        cita.pagada
+    ]);
+
+    await connection.query(query, [values]);
+    console.log(`✔️ Se insertaron ${citas.length} nuevas citas.`);
+};
+
+exports.obtenerNuevasCitasPorTratamiento = async (tratamientoPacienteId, connection) => {
+    const query = `SELECT * FROM citas WHERE tratamiento_paciente_id = ? ORDER BY id ASC`;
+    const [rows] = await connection.query(query, [tratamientoPacienteId]);
+    return rows;
+};

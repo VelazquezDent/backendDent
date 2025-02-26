@@ -11,6 +11,7 @@ router.get('/pendientes', tratamientoPacienteController.obtenerTratamientosPendi
 router.get('/verificar/:usuarioId', tratamientoPacienteController.verificarTratamientoActivo);
 // Nuevo endpoint para obtener tratamientos activos por usuarioId
 router.get("/activo/:usuarioId", tratamientoPacienteController.obtenerTratamientosActivosPorUsuario);
-
+// Nueva ruta para generar citas y pagos
+router.post('/crear-nuevas-citas-pagos', tratamientoPacienteController.crearNuevoTratamientoConCitasYPagos);
 
 module.exports = router;

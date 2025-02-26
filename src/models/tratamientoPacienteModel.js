@@ -95,3 +95,23 @@ exports.obtenerTratamientosActivosPorUsuario = async (usuarioId) => {
     const [rows] = await db.query(query, [usuarioId]);
     return rows;
 };
+exports.obtenerTratamientoPorId = async (tratamientoPacienteId, connection) => {
+    const query = `
+        SELECT usuario_id, paciente_id, citas_totales, estado 
+        FROM tratamientos_pacientes 
+        WHERE id = ? 
+        LIMIT 1;
+    `;
+    const [rows] = await connection.query(query, [tratamientoPacienteId]);
+    return rows.length > 0 ? rows[0] : null;
+};
+
+exports.actualizarCitasTotalesYEstado = async (tratamientoPacienteId, citasTotales, estado, connection) => {
+    const query = `
+        UPDATE tratamientos_pacientes 
+        SET citas_totales = ?, estado = ? 
+        WHERE id = ?;
+    `;
+    await connection.query(query, [citasTotales, estado, tratamientoPacienteId]);
+    console.log(`✔️ Tratamiento ${tratamientoPacienteId} actualizado: citas_totales = ${citasTotales}, estado = ${estado}`);
+};
