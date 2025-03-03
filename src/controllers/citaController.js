@@ -62,3 +62,25 @@ exports.obtenerCitasPorTratamiento = async (req, res) => {
         res.status(500).json({ mensaje: 'Error al obtener citas del tratamiento' });
     }
 };
+exports.actualizarFechaHoraCita = async (req, res) => {
+    try {
+        const { id } = req.params; // ID de la cita
+        const { fechaHora } = req.body; // Nueva fecha y hora
+
+        if (!fechaHora) {
+            return res.status(400).json({ mensaje: "La nueva fecha y hora son obligatorias." });
+        }
+
+        // Actualizar la cita en la base de datos
+        const resultado = await citaModel.actualizarFechaHoraCita(id, fechaHora);
+
+        if (resultado.affectedRows === 0) {
+            return res.status(404).json({ mensaje: "No se encontró la cita o ya fue asignada." });
+        }
+
+        res.status(200).json({ mensaje: "Fecha y hora de la cita actualizadas correctamente." });
+    } catch (error) {
+        console.error("❌ Error al actualizar la cita:", error);
+        res.status(500).json({ mensaje: "Error interno al actualizar la cita." });
+    }
+};

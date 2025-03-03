@@ -12,4 +12,6 @@ router.get('/proximas', citaController.obtenerProximasCitas);
 router.get('/activas', citaController.obtenerCitasActivas);
 // Ruta para obtener citas de un tratamiento específico
 router.get('/tratamiento/:tratamientoPacienteId', citaController.obtenerCitasPorTratamiento);
+router.put('/actualizar/:id', citaController.actualizarFechaHoraCita);
+
 module.exports = router;

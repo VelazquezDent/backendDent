@@ -169,3 +169,12 @@ exports.obtenerNuevasCitasPorTratamiento = async (tratamientoPacienteId, connect
     const [rows] = await connection.query(query, [tratamientoPacienteId]);
     return rows;
 };
+exports.actualizarFechaHoraCita = async (id, fechaHora) => {
+    const query = `
+        UPDATE citas 
+        SET fecha_hora = ?, estado = 'pendiente'
+        WHERE id = ? AND fecha_hora IS NULL;
+    `;
+    const [resultado] = await db.execute(query, [fechaHora, id]);
+    return resultado;
+};
