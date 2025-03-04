@@ -112,4 +112,30 @@ exports.completarCita = async (req, res) => {
         res.status(500).json({ mensaje: "Error interno al marcar la cita como completada." });
     }
 };
+exports.actualizarFechaHoraCita = async (req, res) => {
+    try {
+        const { id } = req.params; // ID de la cita
+        const { fechaHora } = req.body; // Nueva fecha y hora
+
+        console.log(`📅 Intentando actualizar la cita ID: ${id} con nueva fecha/hora: ${fechaHora}`);
+
+        if (!fechaHora) {
+            return res.status(400).json({ mensaje: "La nueva fecha y hora son obligatorias." });
+        }
+
+        // Llamamos a la función del modelo para verificar y actualizar
+        const resultado = await citaModel.actualizarFechaHoraCita(id, fechaHora);
+
+        if (resultado.error) {
+            return res.status(400).json({ mensaje: resultado.message });
+        }
+
+        console.log("✔️ Fecha y hora de la cita actualizadas correctamente.");
+        res.status(200).json({ mensaje: "Fecha y hora de la cita actualizadas correctamente." });
+    } catch (error) {
+        console.error("❌ Error al actualizar la fecha y hora de la cita:", error);
+        res.status(500).json({ mensaje: "Error interno al actualizar la cita." });
+    }
+};
+
 

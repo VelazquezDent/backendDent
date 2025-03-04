@@ -201,3 +201,29 @@ exports.marcarCitaComoCompletada = async (id, comentario) => {
 
     return resultado;
 };
+exports.actualizarFechaHoraCita = async (id, fechaHora) => {
+    // Primero obtenemos la información actual de la cita
+    const querySelect = `SELECT estado, pagada FROM citas WHERE id = ?`;
+    const [cita] = await db.execute(querySelect, [id]);
+
+    if (!cita || cita.length === 0) {
+        return { error: true, message: "La cita no existe." };
+    }
+
+    // Verificamos si la cita está completada y pagada
+    if (cita[0].estado === 'completada' && cita[0].pagada === 1) {
+        return { error: true, message: "No se puede actualizar una cita completada y pagada." };
+    }
+
+    // Si la cita no está completada o no está pagada, se permite la actualización
+    const queryUpdate = `
+        UPDATE citas 
+        SET fecha_hora = ?, estado = 'pendiente'
+        WHERE id = ?;
+    `;
+
+    const [resultado] = await db.execute(queryUpdate, [fechaHora, id]);
+
+    return resultado;
+};
+
