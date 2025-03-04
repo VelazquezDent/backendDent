@@ -178,3 +178,26 @@ exports.actualizarFechaHoraCita = async (id, fechaHora) => {
     const [resultado] = await db.execute(query, [fechaHora, id]);
     return resultado;
 };
+// Obtener una cita por ID
+exports.obtenerCitaPorId = async (id) => {
+    const query = `SELECT * FROM citas WHERE id = ?`;
+    const [rows] = await db.execute(query, [id]);
+    return rows.length > 0 ? rows[0] : null;
+};
+
+// Marcar cita como completada y agregar comentario
+exports.marcarCitaComoCompletada = async (id, comentario) => {
+    const query = `
+        UPDATE citas 
+        SET estado = 'completada', comentario = ? 
+        WHERE id = ?;
+    `;
+
+    console.log("🛠️ Ejecutando consulta SQL:", query, "con valores:", [comentario, id]); // 🔹 LOG para debug
+
+    const [resultado] = await db.execute(query, [comentario, id]);
+
+    console.log("🔎 Resultado de la actualización:", resultado); // 🔹 LOG de resultado
+
+    return resultado;
+};

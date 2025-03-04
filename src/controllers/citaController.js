@@ -84,3 +84,32 @@ exports.actualizarFechaHoraCita = async (req, res) => {
         res.status(500).json({ mensaje: "Error interno al actualizar la cita." });
     }
 };
+exports.completarCita = async (req, res) => {
+    try {
+        const { id } = req.params; // ID de la cita
+        const { comentario } = req.body; // Comentario opcional
+
+        console.log("📩 Comentario recibido:", comentario); // 🔹 LOG para verificar
+
+        // Validar si la cita existe antes de actualizar
+        const citaExistente = await citaModel.obtenerCitaPorId(id);
+        if (!citaExistente) {
+            return res.status(404).json({ mensaje: "La cita no existe." });
+        }
+
+        // Actualizar la cita en la base de datos
+        const resultado = await citaModel.marcarCitaComoCompletada(id, comentario);
+
+        if (resultado.affectedRows === 0) {
+            return res.status(404).json({ mensaje: "No se pudo actualizar la cita." });
+        }
+
+        console.log("✔️ Cita actualizada con comentario:", comentario); // 🔹 LOG de éxito
+
+        res.status(200).json({ mensaje: "Cita marcada como completada correctamente." });
+    } catch (error) {
+        console.error("❌ Error al marcar la cita como completada:", error);
+        res.status(500).json({ mensaje: "Error interno al marcar la cita como completada." });
+    }
+};
+
