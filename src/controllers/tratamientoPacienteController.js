@@ -279,3 +279,12 @@ exports.crearNuevoTratamientoConCitasYPagos = async (req, res) => {
         connection.release();
     }
 };
+exports.obtenerHistorialTratamientos = async (req, res) => {
+    try {
+        const historial = await tratamientoPacienteModel.obtenerHistorialTratamientos();
+        res.status(200).json(historial);
+    } catch (error) {
+        console.error('Error al obtener historial de tratamientos:', error);
+        res.status(500).json({ mensaje: 'Error al obtener historial de tratamientos' });
+    }
+};

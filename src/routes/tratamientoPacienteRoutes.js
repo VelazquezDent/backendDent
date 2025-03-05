@@ -14,4 +14,6 @@ router.get("/activo/:usuarioId", tratamientoPacienteController.obtenerTratamient
 // Nueva ruta para generar citas y pagos
 router.post('/crear-nuevas-citas-pagos', tratamientoPacienteController.crearNuevoTratamientoConCitasYPagos);
 
+// Nueva ruta para obtener historial de tratamientos terminados
+router.get('/historial', tratamientoPacienteController.obtenerHistorialTratamientos);
 module.exports = router;
