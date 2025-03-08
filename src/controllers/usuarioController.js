@@ -311,5 +311,30 @@ const buscarUsuario = async (req, res) => {
         res.status(500).json({ mensaje: "Error interno del servidor." });
     }
 };
+const obtenerPacientes = async (req, res) => {
+    try {
+        // Consultar la base de datos para obtener solo los usuarios de tipo "paciente"
+        const pacientes = await userModel.obtenerTodosLosPacientes();
 
-module.exports = { buscarUsuario, registrarUsuario, verificarCodigo, loginUsuario, enviarCorreoRecuperacion, cambiarPassword,logoutUsuario,verificarSesion };
+        // Verificar si hay pacientes en la base de datos
+        if (!pacientes.length) {
+            return res.status(404).json({ mensaje: "No hay pacientes registrados." });
+        }
+
+        res.status(200).json(pacientes);
+    } catch (error) {
+        console.error("Error al obtener pacientes:", error);
+        res.status(500).json({ mensaje: "Error interno del servidor." });
+    }
+};
+
+module.exports = { 
+    buscarUsuario, 
+    registrarUsuario, 
+    verificarCodigo, 
+    loginUsuario, 
+    enviarCorreoRecuperacion, 
+    cambiarPassword,
+    logoutUsuario,
+    verificarSesion,
+    obtenerPacientes};

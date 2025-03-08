@@ -154,6 +154,14 @@ const buscarEnPacientesSinPlataforma = async (nombre, apellido_paterno, apellido
     return result;
 };
 
+const obtenerTodosLosPacientes = async () => {
+    const [pacientes] = await db.query(
+        `SELECT id, nombre, apellido_paterno, apellido_materno, telefono, fecha_nacimiento, sexo, email, fecha_creacion 
+         FROM usuarios 
+         WHERE tipo = 'paciente'`
+    );
+    return pacientes;
+};
 
 module.exports = {
     crearUsuario,
@@ -169,5 +177,6 @@ module.exports = {
     actualizarPassword,
     obtenerUsuarioPorTelefono,
     buscarEnUsuarios,
-    buscarEnPacientesSinPlataforma
+    buscarEnPacientesSinPlataforma,
+    obtenerTodosLosPacientes
 };

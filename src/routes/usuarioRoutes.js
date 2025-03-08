@@ -23,5 +23,8 @@ router.post('/cambiar-password', usuarioController.cambiarPassword);
 router.get('/verificar-sesion', autenticarUsuario(), usuarioController.verificarSesion);
 // Endpoint para buscar usuario
 router.post('/buscar', usuarioController.buscarUsuario);
+// Ruta para obtener la lista de todos los pacientes
+router.get('/pacientes', usuarioController.obtenerPacientes);
+
 
 module.exports = router;
