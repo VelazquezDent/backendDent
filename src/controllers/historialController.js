@@ -2,11 +2,11 @@ const historialModel = require('../models/historialModel');
 
 exports.obtenerHistorialesPorUsuario = async (req, res) => {
     try {
-        const { usuarioId } = req.params;
+        const { usuarioId,  } = req.params;
         const historiales = await historialModel.obtenerHistorialesPorUsuario(usuarioId);
 
         if (historiales.length === 0) {
-            console.warn(`⚠️ No hay historiales médicos para el usuario ID: ${usuarioId}.`);
+            console.warn(`⚠️ No hay historiales médicos.`);
             return res.status(200).json([]); // ✅ Devolver 200 con array vacío en vez de 404
         }
 
