@@ -3,13 +3,14 @@ const db = require('../db');
 exports.crearTratamientoPaciente = async (data, connection) => {
     const query = `
         INSERT INTO tratamientos_pacientes 
-        (usuario_id, tratamiento_id, citas_totales, citas_asistidas, estado, fecha_inicio) 
-        VALUES (?, ?, ?, ?, ?, ?)
+        (usuario_id, paciente_id, tratamiento_id, citas_totales, citas_asistidas, estado, fecha_inicio) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
-    const values = [data.usuarioId, data.tratamientoId, data.citasTotales, 0, data.estado, data.fechaInicio];
+    const values = [data.usuarioId, data.pacienteId, data.tratamientoId, data.citasTotales, 0, data.estado, data.fechaInicio];
     const [result] = await connection.query(query, values);
     return result.insertId;
 };
+
 
 exports.obtenerTratamientosEnProgreso = async () => {
     const query = `
@@ -72,6 +73,27 @@ exports.tieneTratamientoActivo = async (usuarioId) => {
     const [rows] = await db.query(query, [usuarioId]);
     return rows.length > 0 ? rows[0] : null;
 };
+exports.tieneTratamientoActivoTipo = async (id, tipo) => {
+    let query = `
+        SELECT id, estado FROM tratamientos_pacientes 
+        WHERE ${tipo === 'usuario' ? 'usuario_id' : 'paciente_id'} = ? 
+        AND estado IN ('en progreso', 'pendiente')
+    `;
+
+    const [rows] = await db.query(query, [id]);
+    return rows.length > 0 ? rows[0] : null;
+};
+exports.haCompletadoTratamientoTipo = async (id, tipo) => {
+    let query = `
+        SELECT id FROM tratamientos_pacientes 
+        WHERE ${tipo === 'usuario' ? 'usuario_id' : 'paciente_id'} = ? 
+        AND estado = 'terminado'
+    `;
+
+    const [rows] = await db.query(query, [id]);
+    return rows.length > 0;
+};
+
 
 exports.haCompletadoTratamiento = async (usuarioId) => {
     const query = `

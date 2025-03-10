@@ -8,17 +8,20 @@ exports.crearTratamientoCompleto = async (req, res) => {
     await connection.beginTransaction();
 
     try {
-        const { usuarioId, tratamientoId, citasTotales, fechaInicio, precio, requiereEvaluacion } = req.body;
+        const { usuarioId, pacienteId, tratamientoId, citasTotales, fechaInicio, precio, requiereEvaluacion } = req.body;
 
         console.log("📌 Iniciando creación de tratamiento...");
+        console.log("📥 Datos recibidos:", { usuarioId, pacienteId, tratamientoId, citasTotales, fechaInicio, precio, requiereEvaluacion });
 
-        if (!usuarioId || !tratamientoId || !precio || (!requiereEvaluacion && citasTotales < 1)) {
-            throw new Error("❌ Datos inválidos: Faltan campos obligatorios.");
+        // ✅ Validación correcta de datos obligatorios
+        if ((usuarioId === null && pacienteId === null) || !tratamientoId || !precio || (!requiereEvaluacion && citasTotales < 1)) {
+            throw new Error("❌ Datos inválidos: Se requiere un usuario o un paciente sin plataforma.");
         }
 
-        // 1️⃣ **Crear el tratamiento del paciente**
+        // 1️⃣ **Crear el tratamiento del paciente o paciente sin plataforma**
         const tratamientoPacienteId = await tratamientoPacienteModel.crearTratamientoPaciente({
-            usuarioId,
+            usuarioId: usuarioId || null,
+            pacienteId: pacienteId || null,
             tratamientoId,
             citasTotales: requiereEvaluacion ? 0 : citasTotales,
             citasAsistidas: 0,
@@ -26,9 +29,13 @@ exports.crearTratamientoCompleto = async (req, res) => {
             estado: requiereEvaluacion ? 'pendiente' : 'en progreso'
         }, connection);
 
+        if (!tratamientoPacienteId) {
+            throw new Error("❌ Error: No se pudo crear el tratamiento.");
+        }
+
         console.log(`✔️ Tratamiento creado con ID: ${tratamientoPacienteId}`);
 
-        // 2️⃣ **Crear todas las citas**
+        // 2️⃣ **Crear las citas**
         let citas = [{
             tratamientoPacienteId,
             fechaHora: fechaInicio,
@@ -40,32 +47,34 @@ exports.crearTratamientoCompleto = async (req, res) => {
             for (let i = 1; i < citasTotales; i++) {
                 citas.push({
                     tratamientoPacienteId,
-                    fechaHora: null, 
+                    fechaHora: null,
                     estado: 'pendiente',
                     pagada: 0
                 });
             }
         }
 
+        console.log("📅 Citas a crear:", citas);
+
         await citaModel.crearCitas(citas, connection);
         console.log(`✔️ ${citas.length} citas creadas.`);
 
-        // 3️⃣ **Confirmar la transacción antes de obtener las citas**
-        await connection.commit(); 
+        // 3️⃣ **Confirmar transacción antes de obtener citas**
+        await connection.commit();
 
-        // 4️⃣ **Obtener todas las citas creadas**
+        // 4️⃣ **Obtener citas creadas**
         const citasCreadas = await citaModel.obtenerCitasPorTratamiento(tratamientoPacienteId, connection);
 
         if (citasCreadas.length === 0) {
-            throw new Error("❌ Error: No se obtuvieron citas después de la inserción.");
+            throw new Error("❌ No se obtuvieron citas después de la inserción.");
         }
 
         console.log("📌 Citas creadas después de la inserción:", citasCreadas);
 
         // 5️⃣ **Crear pagos para TODAS las citas**
         const pagos = citasCreadas.map(cita => ({
-            usuarioId,
-            pacienteId: null,
+            usuarioId: usuarioId || null,
+            pacienteId: pacienteId || null,
             citaId: cita.id,
             monto: precio,
             metodo: null,
@@ -74,23 +83,23 @@ exports.crearTratamientoCompleto = async (req, res) => {
         }));
 
         if (pagos.length > 0) {
-            console.log("📌 Generando pagos para todas las citas:", pagos);
+            console.log("📌 Generando pagos para citas:", pagos);
             await pagoModel.crearPagos(pagos, connection);
             console.log(`✔️ ${pagos.length} pagos creados correctamente.`);
         } else {
-            console.warn("⚠️ No hay pagos para insertar. Se omite la consulta.");
+            console.warn("⚠️ No hay pagos para insertar.");
         }
 
         res.status(201).json({
             mensaje: requiereEvaluacion
-                ? 'Tratamiento creado con cita de evaluación y un pago asociado. El médico determinará cuántas citas necesitas.'
+                ? 'Tratamiento creado con cita de evaluación.'
                 : 'Tratamiento, citas y pagos creados exitosamente',
             tratamientoPacienteId
         });
 
     } catch (error) {
         await connection.rollback();
-        console.error('❌ Error al crear el tratamiento completo:', error.message);
+        console.error('❌ Error al crear el tratamiento:', error.message);
         res.status(500).json({ mensaje: error.message });
     } finally {
         connection.release();
@@ -146,6 +155,47 @@ exports.verificarTratamientoActivo = async (req, res) => {
         res.status(500).json({ mensaje: "Error al verificar el tratamiento activo." });
     }
 };
+exports.verificarTratamientoActivoTipo = async (req, res) => {
+    const { tipo, id } = req.params;
+
+    try {
+        let tratamientoActivo = null;
+        let haCompletado = false;
+
+        if (tipo === 'usuario') {
+            // 🔹 Verificar si el usuario de la tabla `usuarios` tiene un tratamiento activo
+            tratamientoActivo = await tratamientoPacienteModel.tieneTratamientoActivoTipo(id, 'usuario');
+            haCompletado = await tratamientoPacienteModel.haCompletadoTratamientoTipo(id, 'usuario');
+        } else if (tipo === 'paciente_sin_plataforma') {
+            // 🔹 Verificar si el paciente de la tabla `pacientes_sin_plataforma` tiene un tratamiento activo
+            tratamientoActivo = await tratamientoPacienteModel.tieneTratamientoActivoTipo(id, 'paciente_sin_plataforma');
+            haCompletado = await tratamientoPacienteModel.haCompletadoTratamientoTipo(id, 'paciente_sin_plataforma');
+        } else {
+            return res.status(400).json({ mensaje: "❌ Tipo de usuario no válido." });
+        }
+
+        if (tratamientoActivo) {
+            return res.status(200).json({
+                tieneTratamientoActivo: true,
+                mensaje: "El usuario ya tiene un tratamiento activo.",
+                tratamiento: tratamientoActivo
+            });
+        }
+
+        res.status(200).json({
+            tieneTratamientoActivo: false,
+            puedeCrearNuevo: haCompletado,
+            mensaje: haCompletado 
+                ? "El usuario ya ha completado un tratamiento y puede crear uno nuevo."
+                : "El usuario no tiene registros de tratamientos."
+        });
+
+    } catch (error) {
+        console.error("❌ Error al verificar tratamiento activo:", error);
+        res.status(500).json({ mensaje: "Error al verificar el tratamiento activo." });
+    }
+};
+
 exports.obtenerTratamientosActivosPorUsuario = async (req, res) => {
     const { usuarioId } = req.params;
 

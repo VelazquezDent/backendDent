@@ -20,12 +20,15 @@ exports.crearPago = async (pago, connection) => {
 
 exports.crearPagos = async (pagos, connection) => {
     if (!pagos || pagos.length === 0) {
-        console.log("⚠️ No hay pagos para insertar. Se omite la consulta.");
+        console.log("⚠️ No hay pagos para insertar.");
         return;
     }
 
-    const query = `INSERT INTO pagos (usuario_id, paciente_id, cita_id, monto, metodo, estado, fecha_pago) VALUES ?`;
-    
+    const query = `
+        INSERT INTO pagos (usuario_id, paciente_id, cita_id, monto, metodo, estado, fecha_pago) 
+        VALUES ?
+    `;
+
     const values = pagos.map(pago => [
         pago.usuarioId,
         pago.pacienteId,
@@ -39,6 +42,7 @@ exports.crearPagos = async (pagos, connection) => {
     await connection.query(query, [values]);
     console.log(`✔️ Se insertaron ${pagos.length} pagos.`);
 };
+
 exports.crearNuevosPagos = async (pagos, connection) => {
     if (!pagos || pagos.length === 0) {
         console.log("⚠️ No hay pagos para insertar. Se omite la consulta.");

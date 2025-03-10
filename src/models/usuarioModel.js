@@ -114,7 +114,7 @@ const obtenerUsuarioPorTelefono = async (telefono) => {
 
 // Función para buscar un usuario en la tabla `usuarios`
 const buscarEnUsuarios = async (nombre, apellido_paterno, apellido_materno, fecha_nacimiento, email, telefono) => {
-    let query = `SELECT id, nombre, apellido_paterno, apellido_materno, telefono, fecha_nacimiento, sexo, email, 'usuarios' AS origen 
+    let query = `SELECT id, nombre, apellido_paterno, apellido_materno, telefono, fecha_nacimiento, sexo, email, 'usuario' AS tipo 
                  FROM usuarios 
                  WHERE nombre = ? AND apellido_paterno = ? AND apellido_materno = ? AND fecha_nacimiento = ?`;
     
@@ -135,7 +135,7 @@ const buscarEnUsuarios = async (nombre, apellido_paterno, apellido_materno, fech
 
 // Función para buscar un usuario en la tabla `pacientes_sin_plataforma`
 const buscarEnPacientesSinPlataforma = async (nombre, apellido_paterno, apellido_materno, fecha_nacimiento, email, telefono) => {
-    let query = `SELECT id, nombre, apellido_paterno, apellido_materno, telefono, fecha_nacimiento, sexo, email, 'pacientes_sin_plataforma' AS origen 
+    let query = `SELECT id, nombre, apellido_paterno, apellido_materno, telefono, fecha_nacimiento, sexo, email, 'paciente_sin_plataforma' AS tipo 
                  FROM pacientes_sin_plataforma 
                  WHERE nombre = ? AND apellido_paterno = ? AND apellido_materno = ? AND fecha_nacimiento = ?`;
     
