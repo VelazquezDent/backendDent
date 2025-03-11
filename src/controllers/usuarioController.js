@@ -327,6 +327,75 @@ const obtenerPacientes = async (req, res) => {
         res.status(500).json({ mensaje: "Error interno del servidor." });
     }
 };
+const obtenerPerfilUsuario = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Verificar si el usuario existe en la base de datos
+        const usuario = await userModel.obtenerUsuarioPorId(id);
+
+        if (!usuario) {
+            return res.status(404).json({ mensaje: "Usuario no encontrado." });
+        }
+
+        // Excluir la contraseña por seguridad antes de enviarla al frontend
+        const { password, ...usuarioSeguro } = usuario;
+
+        res.status(200).json(usuarioSeguro);
+    } catch (error) {
+        console.error("Error al obtener el perfil del usuario:", error);
+        res.status(500).json({ mensaje: "Error interno del servidor." });
+    }
+};
+const cambiarPasswordPorId = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { actualPassword, nuevaPassword } = req.body;
+
+        // Verificar si el usuario existe
+        const usuario = await userModel.obtenerUsuarioPorId(id);
+        if (!usuario) {
+            return res.status(404).json({ mensaje: 'Usuario no encontrado.' });
+        }
+
+        // Verificar que la contraseña actual no sea vacía
+        if (!actualPassword) {
+            return res.status(400).json({ mensaje: 'Debe proporcionar la contraseña actual.' });
+        }
+
+        // Verificar que el usuario tiene una contraseña almacenada
+        if (!usuario.password) {
+            return res.status(500).json({ mensaje: 'Error: el usuario no tiene una contraseña establecida.' });
+        }
+
+        // Verificar la contraseña actual
+        const esValida = await bcrypt.compare(actualPassword, usuario.password);
+        if (!esValida) {
+            return res.status(401).json({ mensaje: 'Contraseña actual incorrecta.' });
+        }
+
+        // Verificar si la nueva contraseña ya fue utilizada en el historial
+        const yaUsada = await userModel.verificarPasswordEnHistorial(id, nuevaPassword);
+        if (yaUsada) {
+            return res.status(409).json({ mensaje: 'Esta contraseña ya ha sido utilizada anteriormente.' });
+        }
+
+        // Hashear la nueva contraseña
+        const hashedPassword = await bcrypt.hash(nuevaPassword, 10);
+
+        // Actualizar la contraseña en la base de datos
+        await userModel.actualizarPassword(id, hashedPassword);
+
+        // Guardar la nueva contraseña en el historial
+        await userModel.guardarHistorialContrasena(id, hashedPassword);
+
+        res.status(200).json({ mensaje: 'Contraseña actualizada con éxito.' });
+    } catch (error) {
+        console.error('Error al cambiar la contraseña:', error);
+        res.status(500).json({ mensaje: 'Error interno del servidor.' });
+    }
+};
+
 
 module.exports = { 
     buscarUsuario, 
@@ -337,4 +406,6 @@ module.exports = {
     cambiarPassword,
     logoutUsuario,
     verificarSesion,
-    obtenerPacientes};
+    obtenerPacientes,
+    obtenerPerfilUsuario,
+    cambiarPasswordPorId};

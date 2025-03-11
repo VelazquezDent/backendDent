@@ -25,6 +25,11 @@ router.get('/verificar-sesion', autenticarUsuario(), usuarioController.verificar
 router.post('/buscar', usuarioController.buscarUsuario);
 // Ruta para obtener la lista de todos los pacientes
 router.get('/pacientes', usuarioController.obtenerPacientes);
+// Ruta para obtener la información personal del usuario por ID
+router.get('/perfil/:id', usuarioController.obtenerPerfilUsuario);
+// Ruta para cambiar la contraseña por ID
+router.post('/cambiar-password/:id', usuarioController.cambiarPasswordPorId);
+
 
 
 module.exports = router;

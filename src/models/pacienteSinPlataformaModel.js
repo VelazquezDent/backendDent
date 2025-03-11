@@ -20,7 +20,16 @@ const obtenerPacienteSinPlataforma = async () => {
     );
     return pacientes;
 };
+// ✅ **Modificamos esta función para filtrar por email o teléfono**
+const obtenerPacienteSinPlataformaExistentes = async (email, telefono) => {
+    const [pacientes] = await db.query(
+        `SELECT * FROM pacientes_sin_plataforma WHERE email = ? OR telefono = ?`,
+        [email, telefono]
+    );
+    return pacientes.length > 0 ? pacientes[0] : null; // Si hay resultados, retorna el primer paciente
+};
 module.exports = {
     crearPacienteSinPlataforma,
-    obtenerPacienteSinPlataforma
+    obtenerPacienteSinPlataforma,
+    obtenerPacienteSinPlataformaExistentes
 };

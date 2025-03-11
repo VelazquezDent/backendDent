@@ -162,6 +162,11 @@ const obtenerTodosLosPacientes = async () => {
     );
     return pacientes;
 };
+const obtenerUsuarioPorId = async (id) => {
+    const query = "SELECT id, nombre, apellido_paterno, apellido_materno, telefono, fecha_nacimiento, sexo, email, password FROM usuarios WHERE id = ?";
+    const [result] = await db.execute(query, [id]);
+    return result.length > 0 ? result[0] : null;
+};
 
 module.exports = {
     crearUsuario,
@@ -178,5 +183,6 @@ module.exports = {
     obtenerUsuarioPorTelefono,
     buscarEnUsuarios,
     buscarEnPacientesSinPlataforma,
-    obtenerTodosLosPacientes
+    obtenerTodosLosPacientes,
+    obtenerUsuarioPorId
 };

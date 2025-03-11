@@ -10,10 +10,10 @@ const registrarPacienteSinPlataforma = async (req, res) => {
             return res.status(400).json({ mensaje: 'Todos los campos son obligatorios.' });
         }
 
-        // Verificar si el paciente ya existe
-        const pacienteExistente = await pacienteModel.obtenerPacienteSinPlataforma(email, telefono);
+        // ✅ **Verificar si el paciente ya existe** (ahora con email y teléfono)
+        const pacienteExistente = await pacienteModel.obtenerPacienteSinPlataformaExistentes(email, telefono);
         if (pacienteExistente) {
-            return res.status(409).json({ mensaje: 'El paciente ya está registrado.' });
+            return res.status(409).json({ mensaje: 'El paciente ya está registrado con este correo o teléfono.' });
         }
 
         // Registrar al paciente sin plataforma
@@ -33,6 +33,7 @@ const registrarPacienteSinPlataforma = async (req, res) => {
         res.status(500).json({ mensaje: 'Error interno del servidor.' });
     }
 };
+
 const obtenerPacientesSinCuenta = async (req, res) => {
     try {
         // Consultar la base de datos para obtener solo los usuarios de tipo "paciente"
