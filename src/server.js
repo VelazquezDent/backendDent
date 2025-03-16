@@ -37,7 +37,7 @@ const csrfProtection = csrf({
     path: '/',  // Asegurar disponibilidad en todas las rutas
   }
 });
-//app.use(csrfProtection);  // Aplicar la protección CSRF en toda la app
+app.use(csrfProtection);  // Aplicar la protección CSRF en toda la app
 
 // Ruta para obtener el token CSRF
 app.get('/api/get-csrf-token', (req, res) => {

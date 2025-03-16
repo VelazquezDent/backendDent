@@ -17,5 +17,6 @@ router.post('/crear-nuevas-citas-pagos', tratamientoPacienteController.crearNuev
 // Nueva ruta para obtener historial de tratamientos terminados
 router.get('/historial', tratamientoPacienteController.obtenerHistorialTratamientos);
 router.get('/verificar/:tipo/:id', tratamientoPacienteController.verificarTratamientoActivoTipo);
+router.get('/historial/:usuario_id', tratamientoPacienteController.obtenerHistorialPorUsuario);
 
 module.exports = router;

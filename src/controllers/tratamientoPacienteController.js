@@ -338,3 +338,14 @@ exports.obtenerHistorialTratamientos = async (req, res) => {
         res.status(500).json({ mensaje: 'Error al obtener historial de tratamientos' });
     }
 };
+exports.obtenerHistorialPorUsuario = async (req, res) => {
+    const { usuario_id } = req.params;
+
+    try {
+        const historial = await tratamientoPacienteModel.obtenerHistorialPorUsuario(usuario_id);
+        res.status(200).json(historial);
+    } catch (error) {
+        console.error('Error al obtener historial de tratamientos para usuario:', error);
+        res.status(500).json({ mensaje: 'Error al obtener historial de tratamientos' });
+    }
+};
