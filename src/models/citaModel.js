@@ -60,7 +60,8 @@ exports.obtenerCitasPorUsuario = async (usuarioId) => {
 
         FROM citas c
         JOIN tratamientos_pacientes tp ON c.tratamiento_paciente_id = tp.id
-        WHERE tp.usuario_id = ?
+        WHERE tp.usuario_id = ? 
+          AND tp.estado IN ('en progreso', 'pendiente') -- Incluir tratamientos en progreso o pendientes
         ORDER BY c.id ASC;
     `;
 
@@ -72,6 +73,8 @@ exports.obtenerCitasPorUsuario = async (usuarioId) => {
         estado_cita: cita.estado_cita // Mantener NULL si está en la BD
     }));
 };
+
+
 exports.obtenerProximasCitas = async () => {
     const query = `
         SELECT 
