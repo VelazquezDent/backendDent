@@ -74,7 +74,6 @@ exports.obtenerCitasPorUsuario = async (usuarioId) => {
     }));
 };
 
-
 exports.obtenerProximasCitas = async () => {
     const query = `
         SELECT 
@@ -228,5 +227,17 @@ exports.actualizarFechaHoraCita = async (id, fechaHora) => {
     const [resultado] = await db.execute(queryUpdate, [fechaHora, id]);
 
     return resultado;
+};
+
+exports.obtenerNotificacionesCitas = async () => {
+    const query = `
+        SELECT id, fecha_hora
+        FROM citas
+        WHERE DATE(fecha_hora) IN (CURDATE(), DATE_ADD(CURDATE(), INTERVAL 1 DAY))
+        ORDER BY fecha_hora ASC;
+    `;
+
+    const [citas] = await db.execute(query);
+    return citas;
 };
 

@@ -1,3 +1,4 @@
+const moment = require('moment-timezone');
 const citaModel = require('../models/citaModel');
 
 exports.crearCitas = async (req, res) => {
@@ -137,5 +138,38 @@ exports.actualizarFechaHoraCita = async (req, res) => {
         res.status(500).json({ mensaje: "Error interno al actualizar la cita." });
     }
 };
+exports.obtenerNotificacionesCitas = async (req, res) => {
+    try {
+        // Obtener citas para hoy y mañana
+        const citas = await citaModel.obtenerNotificacionesCitas();
 
+        // Obtener la fecha de hoy y mañana en la zona horaria de México
+        const hoy = moment().tz("America/Mexico_City").format("YYYY-MM-DD");
+        const mañana = moment().add(1, 'days').tz("America/Mexico_City").format("YYYY-MM-DD");
+
+        // Formatear las citas con información de si es hoy o mañana
+        const notificaciones = citas.map(cita => {
+            const fechaCita = moment(cita.fecha_hora).tz("America/Mexico_City").format("YYYY-MM-DD");
+            const horaCita = moment(cita.fecha_hora).tz("America/Mexico_City").format("HH:mm");
+
+            let mensaje = "";
+            if (fechaCita === hoy) {
+                mensaje = `Hoy tienes una cita a las ${horaCita}`;
+            } else if (fechaCita === mañana) {
+                mensaje = `Mañana tienes una cita a las ${horaCita}`;
+            }
+
+            return {
+                id: cita.id,
+                fecha_hora: cita.fecha_hora,
+                mensaje,
+            };
+        });
+
+        res.status(200).json({ notificaciones });
+    } catch (error) {
+        console.error("❌ Error al obtener notificaciones de citas:", error);
+        res.status(500).json({ mensaje: "Error interno al obtener notificaciones de citas." });
+    }
+};
 

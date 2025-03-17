@@ -15,6 +15,7 @@ router.get('/tratamiento/:tratamientoPacienteId', citaController.obtenerCitasPor
 router.put('/actualizar/:id', citaController.actualizarFechaHoraCita);
 router.put('/completar/:id', citaController.completarCita);
 router.put('/actualizar-fecha-hora/:id', citaController.actualizarFechaHoraCita);
+router.get('/notificaciones', citaController.obtenerNotificacionesCitas);
 
 
 module.exports = router;
