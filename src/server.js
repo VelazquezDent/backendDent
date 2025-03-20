@@ -31,9 +31,9 @@ app.use(
 // Configuración de CSRF usando cookies
 const csrfProtection = csrf({
   cookie: {
-    httpOnly: false,  // Permitir acceso desde el frontend
-    secure: false,  // Solo en HTTPS en producción
-    sameSite: 'Lax',  // Permitir el uso de cookies entre diferentes dominios
+    httpOnly: true,  // Permitir acceso desde el frontend
+    secure: 'production',  // Solo en HTTPS en producción
+    sameSite: 'None',  // Permitir el uso de cookies entre diferentes dominios
     path: '/',  // Asegurar disponibilidad en todas las rutas
   }
 });
