@@ -31,25 +31,24 @@ app.use(
 // Configuración de CSRF usando cookies
 const csrfProtection = csrf({
   cookie: {
-    httpOnly: false, // Permitir que el frontend pueda acceder a la cookie
-    secure: process.env.NODE_ENV === "production", // Solo HTTPS en producción
-    sameSite: 'None', // Permitir envío de cookies cross-origin
-    path: '/', // Disponible en todas las rutas
+    httpOnly: false,  // Permitir acceso desde el frontend
+    secure: true,     // Cambiado a true para HTTPS en producción
+    sameSite: 'None', // Cambiado a 'None' para permitir cookies entre dominios
+    path: '/',        // Asegurar disponibilidad en todas las rutas
   }
 });
-app.use(csrfProtection); // Aplicar protección CSRF
+app.use(csrfProtection);  // Aplicar la protección CSRF en toda la app
 
-
+// Ruta para obtener el token CSRF
 app.get('/api/get-csrf-token', (req, res) => {
   res.cookie('XSRF-TOKEN', req.csrfToken(), {
-    httpOnly: false, // Permitir acceso desde el frontend
-    secure: process.env.NODE_ENV === "production", 
-    sameSite: 'None',
+    httpOnly: false,  // El frontend debe poder acceder a esta cookie
+    secure: true,     // Cambiado a true para HTTPS
+    sameSite: 'None', // Cambiado a 'None' para permitir cookies entre dominios
     path: '/',
   });
   res.json({ csrfToken: req.csrfToken() });
 });
-
 
 // Rutas protegidas con CSRF
 app.use('/api/usuarios', usuarioRoutes);
