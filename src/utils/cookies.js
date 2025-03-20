@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // Configuración común para las cookies
 const cookieOptions = {
     httpOnly: true,  // La cookie solo se puede acceder desde el servidor
-    secure: true,    // Solo se envía en HTTPS
+    secure: 'production',    // Solo se envía en HTTPS
     sameSite: 'None', // Permitir compartir entre distintos dominios
     path: '/',
 };
