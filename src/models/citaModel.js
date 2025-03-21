@@ -78,7 +78,7 @@ exports.obtenerProximasCitas = async () => {
     const query = `
         SELECT 
             c.id AS cita_id,
-            c.fecha_hora,
+            DATE_FORMAT(c.fecha_hora, '%Y-%m-%d %H:%i:%s') AS fecha_hora,
             COALESCE(c.estado, NULL) AS estado_cita,
             CASE 
                 WHEN c.pagada = 1 THEN 'Pagado'
@@ -108,14 +108,17 @@ exports.obtenerProximasCitas = async () => {
 
         FROM citas c
         JOIN tratamientos_pacientes tp ON c.tratamiento_paciente_id = tp.id
-        JOIN tratamientos t ON tp.tratamiento_id = t.id  -- 🔹 JOIN para obtener el tratamiento
+        JOIN tratamientos t ON tp.tratamiento_id = t.id
         LEFT JOIN usuarios u ON tp.usuario_id = u.id
         LEFT JOIN pacientes_sin_plataforma p ON tp.paciente_id = p.id
         WHERE c.fecha_hora IS NOT NULL 
+          AND c.fecha_hora != '0000-00-00 00:00:00'
         ORDER BY c.fecha_hora ASC;
     `;
 
     const [citas] = await db.execute(query);
+
+    // Devolvemos las citas sin modificar la fecha
     return citas;
 };
 exports.obtenerCitasActivas = async () => {
