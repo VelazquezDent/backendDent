@@ -231,7 +231,7 @@ exports.crearNuevoTratamientoConCitasYPagos = async (req, res) => {
 
         console.log("📌 Verificando tratamiento, citas y pagos existentes...");
 
-        // **1️⃣ Obtener el usuario/paciente y estado del tratamiento**
+        // 1️⃣ Obtener el usuario/paciente y estado del tratamiento
         const tratamiento = await tratamientoPacienteModel.obtenerTratamientoPorId(tratamientoPacienteId, connection);
         if (!tratamiento) {
             throw new Error("❌ Error: No se encontró el tratamiento asociado.");
@@ -239,7 +239,7 @@ exports.crearNuevoTratamientoConCitasYPagos = async (req, res) => {
         const { usuario_id, paciente_id, estado } = tratamiento;
         console.log(`🔍 Usuario asociado: ${usuario_id}, Paciente asociado: ${paciente_id}, Estado: ${estado}`);
 
-        // **❌ Si el tratamiento ya está en progreso, no se deben agregar más citas ni pagos**
+        // ❌ Si el tratamiento ya está en progreso, no se deben agregar más citas ni pagos
         if (estado !== 'pendiente') {
             console.log("⚠️ El tratamiento ya está en progreso, no se agregarán más citas ni pagos.");
             await connection.commit();
@@ -249,24 +249,31 @@ exports.crearNuevoTratamientoConCitasYPagos = async (req, res) => {
             });
         }
 
-        // **2️⃣ Contar cuántas citas ya existen para este tratamiento**
+        // 2️⃣ Contar cuántas citas ya existen para este tratamiento
         const citasExistentes = await citaModel.obtenerNuevasCitasPorTratamiento(tratamientoPacienteId, connection);
         const totalCitasExistentes = citasExistentes.length;
         console.log(`🔍 Citas ya creadas: ${totalCitasExistentes}`);
 
-        // **3️⃣ Obtener pagos existentes para estas citas**
+        // 3️⃣ Obtener pagos existentes para estas citas
         const pagosExistentes = await pagoModel.obtenerPagosPorCitas(citasExistentes.map(cita => cita.id), connection);
         console.log(`🔍 Pagos ya creados: ${pagosExistentes.length}`);
 
-        // **4️⃣ Calcular cuántas citas y pagos faltan por crear**
+        // 4️⃣ Calcular cuántas citas y pagos faltan por crear
         const citasFaltantes = citasTotales - totalCitasExistentes;
         const citasSinPago = citasExistentes.filter(cita => !pagosExistentes.some(pago => pago.cita_id === cita.id));
         console.log(`🔍 Citas sin pago: ${citasSinPago.length}`);
 
-        if (citasFaltantes <= 0 && citasSinPago.length === 0) {
-            console.log("✅ No es necesario crear nuevas citas o pagos.");
-        } else {
-            // **5️⃣ Crear las citas faltantes**
+        // 5️⃣ Actualizar el monto de los pagos existentes al precio ingresado, incluso si no hay citas nuevas
+        if (pagosExistentes.length > 0) {
+            for (let pago of pagosExistentes) {
+                await pagoModel.actualizarMontoPago(pago.id, precioPorCita, connection);
+                console.log(`🔄 Monto del pago ${pago.id} actualizado a ${precioPorCita}.`);
+            }
+        }
+
+        // 6️⃣ Crear citas y pagos adicionales si faltan
+        if (citasFaltantes > 0 || citasSinPago.length > 0) {
+            // Crear las citas faltantes
             let citasNuevas = [];
             for (let i = 0; i < citasFaltantes; i++) {
                 citasNuevas.push({
@@ -282,10 +289,10 @@ exports.crearNuevoTratamientoConCitasYPagos = async (req, res) => {
                 console.log(`✔️ ${citasNuevas.length} nuevas citas creadas.`);
             }
 
-            // **6️⃣ Obtener todas las citas nuevamente**
+            // Obtener todas las citas nuevamente
             const citasActualizadas = await citaModel.obtenerNuevasCitasPorTratamiento(tratamientoPacienteId, connection);
 
-            // **7️⃣ Crear nuevos pagos solo para citas que no tenían uno**
+            // Crear nuevos pagos solo para citas que no tenían uno
             const nuevosPagos = citasActualizadas
                 .filter(cita => !pagosExistentes.some(pago => pago.cita_id === cita.id))
                 .map(cita => ({
@@ -302,15 +309,11 @@ exports.crearNuevoTratamientoConCitasYPagos = async (req, res) => {
                 await pagoModel.crearNuevosPagos(nuevosPagos, connection);
                 console.log(`✔️ ${nuevosPagos.length} nuevos pagos creados correctamente.`);
             }
-
-            // **8️⃣ Actualizar el monto de los pagos existentes**
-            for (let pago of pagosExistentes) {
-                await pagoModel.actualizarMontoPago(pago.id, precioPorCita, connection);
-                console.log(`🔄 Monto del pago ${pago.id} actualizado a ${precioPorCita}.`);
-            }
+        } else {
+            console.log("✅ No es necesario crear nuevas citas o pagos, solo se actualizaron los montos existentes.");
         }
 
-        // **9️⃣ Actualizar citas_totales y estado del tratamiento a "en progreso"**
+        // 7️⃣ Actualizar citas_totales y estado del tratamiento a "en progreso"
         await tratamientoPacienteModel.actualizarCitasTotalesYEstado(tratamientoPacienteId, citasTotales, 'en progreso', connection);
         console.log(`✔️ Tratamiento actualizado con citas_totales: ${citasTotales} y estado: 'en progreso'.`);
 
