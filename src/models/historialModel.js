@@ -11,6 +11,7 @@ exports.obtenerHistorialesPorUsuario = async (usuarioId) => {
     const [historiales] = await db.execute(query, [usuarioId]);
     return historiales;
 };
+
 exports.obtenerHistorialesPorUsuarioSinCuenta = async (paciente_Sin_PlataformaId) => {
     const query = `
         SELECT *
@@ -22,14 +23,20 @@ exports.obtenerHistorialesPorUsuarioSinCuenta = async (paciente_Sin_PlataformaId
     const [historiales] = await db.execute(query, [paciente_Sin_PlataformaId]);
     return historiales;
 };
+
 exports.insertarHistorialMedico = async (usuarioId, historialData) => {
     const query = `
         INSERT INTO historial_medico 
-        (usuario_id, signos_vitales, bajo_tratamiento, tipo_tratamiento, medicamentos_recetados, observaciones_medicas) 
-        VALUES (?, ?, ?, ?, ?, ?);
+        (usuario_id, signos_vitales, bajo_tratamiento, tipo_tratamiento, medicamentos_recetados, observaciones_medicas, fecha_registro) 
+        VALUES (?, ?, ?, ?, ?, ?, ?);
     `;
 
-    const { signos_vitales, bajo_tratamiento, tipo_tratamiento, medicamentos_recetados, observaciones_medicas } = historialData;
+    const { signos_vitales, bajo_tratamiento, tipo_tratamiento, medicamentos_recetados, observaciones_medicas, fecha_registro } = historialData;
+
+    // Validar que fecha_registro esté presente
+    if (!fecha_registro) {
+        throw new Error("El campo fecha_registro es requerido.");
+    }
 
     const [resultado] = await db.execute(query, [
         usuarioId,
@@ -37,20 +44,26 @@ exports.insertarHistorialMedico = async (usuarioId, historialData) => {
         bajo_tratamiento,
         tipo_tratamiento,
         medicamentos_recetados,
-        observaciones_medicas
+        observaciones_medicas,
+        fecha_registro
     ]);
 
     return resultado;
 };
+
 exports.insertarHistorialMedicoSinCuenta = async (paciente_Sin_PlataformaId, historialData) => {
-    
     const query = `
         INSERT INTO historial_medico 
-        (paciente_sin_plataforma_id, signos_vitales, bajo_tratamiento, tipo_tratamiento, medicamentos_recetados, observaciones_medicas) 
-        VALUES (?, ?, ?, ?, ?, ?);
+        (paciente_sin_plataforma_id, signos_vitales, bajo_tratamiento, tipo_tratamiento, medicamentos_recetados, observaciones_medicas, fecha_registro) 
+        VALUES (?, ?, ?, ?, ?, ?, ?);
     `;
 
-    const { signos_vitales, bajo_tratamiento, tipo_tratamiento, medicamentos_recetados, observaciones_medicas } = historialData;
+    const { signos_vitales, bajo_tratamiento, tipo_tratamiento, medicamentos_recetados, observaciones_medicas, fecha_registro } = historialData;
+
+    // Validar que fecha_registro esté presente
+    if (!fecha_registro) {
+        throw new Error("El campo fecha_registro es requerido.");
+    }
 
     const [resultado] = await db.execute(query, [
         paciente_Sin_PlataformaId,
@@ -58,9 +71,9 @@ exports.insertarHistorialMedicoSinCuenta = async (paciente_Sin_PlataformaId, his
         bajo_tratamiento,
         tipo_tratamiento,
         medicamentos_recetados,
-        observaciones_medicas
+        observaciones_medicas,
+        fecha_registro
     ]);
 
     return resultado;
 };
-
