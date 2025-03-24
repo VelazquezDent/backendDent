@@ -3,17 +3,17 @@ const pacienteModel = require('../models/pacienteSinPlataformaModel');
 // Función para registrar un paciente sin plataforma
 const registrarPacienteSinPlataforma = async (req, res) => {
     try {
-        const { nombre, apellido_paterno, apellido_materno, telefono, fecha_nacimiento, sexo, email } = req.body;
+        const { nombre, apellido_paterno, apellido_materno, telefono, fecha_nacimiento, sexo, email, fecha_registro } = req.body;
 
-        // Validaciones básicas
-        if (!nombre || !apellido_paterno || !apellido_materno || !fecha_nacimiento || !telefono || !sexo || !email) {
-            return res.status(400).json({ mensaje: 'Todos los campos son obligatorios.' });
+        // Validaciones básicas (email ahora es opcional)
+        if (!nombre || !apellido_paterno || !apellido_materno || !fecha_nacimiento || !telefono || !sexo || !fecha_registro) {
+            return res.status(400).json({ mensaje: 'Todos los campos son obligatorios, excepto el email.' });
         }
 
-        // ✅ **Verificar si el paciente ya existe** (ahora con email y teléfono)
+        // ✅ **Verificar si el paciente ya existe** (usamos telefono, ya que email puede ser null)
         const pacienteExistente = await pacienteModel.obtenerPacienteSinPlataformaExistentes(email, telefono);
         if (pacienteExistente) {
-            return res.status(409).json({ mensaje: 'El paciente ya está registrado con este correo o teléfono.' });
+            return res.status(409).json({ mensaje: 'El paciente ya está registrado con este teléfono.' });
         }
 
         // Registrar al paciente sin plataforma
@@ -24,7 +24,8 @@ const registrarPacienteSinPlataforma = async (req, res) => {
             telefono,
             fecha_nacimiento,
             sexo,
-            email
+            email: email || null, // Si no se proporciona email, enviamos null
+            fecha_registro
         });
 
         res.status(201).json({ mensaje: 'Paciente registrado exitosamente.', paciente_id: pacienteId });
@@ -50,6 +51,7 @@ const obtenerPacientesSinCuenta = async (req, res) => {
         res.status(500).json({ mensaje: "Error interno del servidor." });
     }
 };
+
 module.exports = {
     registrarPacienteSinPlataforma,
     obtenerPacientesSinCuenta,
