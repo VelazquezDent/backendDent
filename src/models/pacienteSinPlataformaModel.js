@@ -21,12 +21,18 @@ const obtenerPacienteSinPlataforma = async () => {
     return pacientes;
 };
 
-// Modificamos esta función para buscar solo por teléfono, ya que email puede ser null
+// Modificamos esta función para buscar por teléfono y email (si se proporciona)
 const obtenerPacienteSinPlataformaExistentes = async (email, telefono) => {
-    const [pacientes] = await db.query(
-        `SELECT * FROM pacientes_sin_plataforma WHERE email = ? OR telefono = ?`,
-        [email, telefono]
-    );
+    let query = `SELECT * FROM pacientes_sin_plataforma WHERE telefono = ?`;
+    const params = [telefono];
+
+    // Si se proporciona un email, lo incluimos en la consulta
+    if (email && email.trim() !== '') {
+        query += ` OR email = ?`;
+        params.push(email);
+    }
+
+    const [pacientes] = await db.query(query, params);
     return pacientes.length > 0 ? pacientes[0] : null; // Si hay resultados, retorna el primer paciente
 };
 

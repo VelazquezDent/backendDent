@@ -5,15 +5,24 @@ const registrarPacienteSinPlataforma = async (req, res) => {
     try {
         const { nombre, apellido_paterno, apellido_materno, telefono, fecha_nacimiento, sexo, email, fecha_registro } = req.body;
 
-        // Validaciones básicas (email ahora es opcional)
+        // Validaciones básicas (email es opcional)
         if (!nombre || !apellido_paterno || !apellido_materno || !fecha_nacimiento || !telefono || !sexo || !fecha_registro) {
             return res.status(400).json({ mensaje: 'Todos los campos son obligatorios, excepto el email.' });
         }
 
-        // ✅ **Verificar si el paciente ya existe** (usamos telefono, ya que email puede ser null)
+        // Verificar si el paciente ya existe (por teléfono o email)
         const pacienteExistente = await pacienteModel.obtenerPacienteSinPlataformaExistentes(email, telefono);
         if (pacienteExistente) {
-            return res.status(409).json({ mensaje: 'El paciente ya está registrado con este teléfono.' });
+            // Determinar qué campo causó el conflicto
+            let mensajeError = 'El paciente ya está registrado: ';
+            if (pacienteExistente.telefono === telefono && pacienteExistente.email === email) {
+                mensajeError += 'el teléfono y el email ya existen.';
+            } else if (pacienteExistente.telefono === telefono) {
+                mensajeError += 'el teléfono ya existe.';
+            } else if (pacienteExistente.email === email) {
+                mensajeError += 'el email ya existe.';
+            }
+            return res.status(409).json({ mensaje: mensajeError });
         }
 
         // Registrar al paciente sin plataforma
