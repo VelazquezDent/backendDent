@@ -69,11 +69,11 @@ exports.obtenerCitasPorUsuario = async (usuarioId) => {
 
     return citas.map(cita => ({
         ...cita,
-        fecha_hora: cita.fecha_hora ? new Date(cita.fecha_hora).toISOString() : null,
+        // Devolver fecha_hora como texto plano, sin convertir a Date ni usar toISOString
+        fecha_hora: cita.fecha_hora || null, // Ya viene como cadena del CONVERT_TZ
         estado_cita: cita.estado_cita // Mantener NULL si está en la BD
     }));
 };
-
 exports.obtenerProximasCitas = async () => {
     const query = `
         SELECT 
