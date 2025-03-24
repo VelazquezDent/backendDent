@@ -46,21 +46,14 @@ const registrarPacienteSinPlataforma = async (req, res) => {
 
 const obtenerPacientesSinCuenta = async (req, res) => {
     try {
-        // Consultar la base de datos para obtener solo los usuarios de tipo "paciente"
         const pacientes = await pacienteModel.obtenerPacienteSinPlataforma();
-
-        // Verificar si hay pacientes en la base de datos
-        if (!pacientes.length) {
-            return res.status(404).json({ mensaje: "No hay pacientes registrados." });
-        }
-
-        res.status(200).json(pacientes);
+        // Siempre devolvemos un arreglo, vacío si no hay datos
+        res.status(200).json(pacientes || []);
     } catch (error) {
         console.error("Error al obtener pacientes:", error);
         res.status(500).json({ mensaje: "Error interno del servidor." });
     }
 };
-
 module.exports = {
     registrarPacienteSinPlataforma,
     obtenerPacientesSinCuenta,
