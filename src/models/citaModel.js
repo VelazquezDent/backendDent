@@ -46,7 +46,7 @@ exports.obtenerCitasPorUsuario = async (usuarioId) => {
             c.id,
             CASE 
                 WHEN c.fecha_hora IS NULL OR c.fecha_hora = '0000-00-00 00:00:00' THEN NULL
-                ELSE CONVERT_TZ(c.fecha_hora, '+00:00', '-06:00') 
+                ELSE DATE_FORMAT(c.fecha_hora, '%Y-%m-%d %H:%i:%s')
             END AS fecha_hora,
             
             -- Mantener el estado tal cual está en la base de datos (puede ser NULL)
@@ -69,8 +69,7 @@ exports.obtenerCitasPorUsuario = async (usuarioId) => {
 
     return citas.map(cita => ({
         ...cita,
-        // Devolver fecha_hora como texto plano, sin convertir a Date ni usar toISOString
-        fecha_hora: cita.fecha_hora || null, // Ya viene como cadena del CONVERT_TZ
+        fecha_hora: cita.fecha_hora || null, // Ya viene como cadena del DATE_FORMAT
         estado_cita: cita.estado_cita // Mantener NULL si está en la BD
     }));
 };
