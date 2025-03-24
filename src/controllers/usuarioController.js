@@ -224,7 +224,7 @@ const enviarCorreoRecuperacion = async (req, res) => {
         await userModel.guardarTokenRecuperacion(usuario.id, token, expiracion);
 
         // Enviar el correo con el enlace de recuperación
-        const enlaceRecuperacion = `http://localhost:5173/cambiar-password?token=${token}`;
+        const enlaceRecuperacion = `https://consultoriovelazquezmcd.com/cambiar-password?token=${token}`;
         await enviarCorreo(
             email,
             'Recuperación de contraseña',
