@@ -87,3 +87,14 @@ exports.actualizarMontoPago = async (pagoId, nuevoMonto, connection) => {
     await connection.query(query, [nuevoMonto, pagoId]);
     console.log(`✔️ Pago ${pagoId} actualizado con monto: ${nuevoMonto}`);
 };
+exports.obtenerPagosPendientesPorUsuario = async (usuarioId, connection) => {
+    const query = `
+        SELECT p.*, c.fecha_hora, c.estado AS estado_cita
+        FROM pagos p
+        JOIN citas c ON p.cita_id = c.id
+        WHERE p.usuario_id = ? AND p.estado = 'pendiente';
+    `;
+    const [rows] = await connection.query(query, [usuarioId]);
+    return rows;
+};
+
