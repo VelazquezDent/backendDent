@@ -10,6 +10,7 @@ const tratamientoPacienteRoutes = require('./routes/tratamientoPacienteRoutes');
 const pagoRoutes = require('./routes/pagoRoutes');
 const historialRoutes = require('./routes/historialRoutes');
 const pacienteSinPlataformaRoutes = require('./routes/pacienteSinPlataformaRoutes');
+const misionVisionRoutes = require('./routes/misionVisionRoutes');
 
 const app = express();
 const port = 4000;
@@ -58,6 +59,8 @@ app.use('/api/tratamientos-pacientes', tratamientoPacienteRoutes);
 app.use('/api/pagos', pagoRoutes);
 app.use('/api/historial', historialRoutes);
 app.use('/api/pacientes-sin-plataforma', pacienteSinPlataformaRoutes);
+app.use('/api/mision-vision', misionVisionRoutes);
+
 
 // Manejo de errores CSRF
 app.use((err, req, res, next) => {
