@@ -29,3 +29,15 @@ exports.obtenerVigentePorTipo = async (tipo) => {
     const [rows] = await db.execute(query, [tipo]);
     return rows.length > 0 ? rows[0] : null;
 };
+
+
+exports.obtenerHistorial = async () => {
+    const query = `
+        SELECT id, tipo, contenido, version, fecha_creacion
+        FROM mision_vision
+        WHERE vigente = 0
+        ORDER BY tipo ASC, version DESC
+    `;
+    const [rows] = await db.execute(query);
+    return rows;
+};

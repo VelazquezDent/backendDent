@@ -47,3 +47,12 @@ exports.obtenerAmbasVigentes = async (req, res) => {
         res.status(500).json({ mensaje: "Error interno al obtener información vigente." });
     }
 };
+exports.obtenerHistorial = async (req, res) => {
+    try {
+        const historial = await misionVisionModel.obtenerHistorial();
+        res.status(200).json(historial);
+    } catch (error) {
+        console.error("❌ Error al obtener historial:", error);
+        res.status(500).json({ mensaje: "Error al obtener historial de misión/visión" });
+    }
+};
