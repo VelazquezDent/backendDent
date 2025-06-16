@@ -56,3 +56,24 @@ exports.obtenerHistorial = async (req, res) => {
         res.status(500).json({ mensaje: "Error al obtener historial de misión/visión" });
     }
 };
+exports.editarVigentePorId = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { contenido } = req.body;
+
+        if (!contenido || contenido.length < 10) {
+            return res.status(400).json({ mensaje: "El contenido debe tener al menos 10 caracteres." });
+        }
+
+        const actualizado = await misionVisionModel.actualizarContenidoVigentePorId(id, contenido);
+
+        if (!actualizado) {
+            return res.status(404).json({ mensaje: "No se encontró una versión vigente con ese ID." });
+        }
+
+        res.status(200).json({ mensaje: "Contenido actualizado correctamente." });
+    } catch (error) {
+        console.error("❌ Error al editar contenido vigente:", error);
+        res.status(500).json({ mensaje: "Error al actualizar la misión o visión." });
+    }
+};

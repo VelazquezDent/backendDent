@@ -30,14 +30,21 @@ exports.obtenerVigentePorTipo = async (tipo) => {
     return rows.length > 0 ? rows[0] : null;
 };
 
-
 exports.obtenerHistorial = async () => {
     const query = `
-        SELECT id, tipo, contenido, version, fecha_creacion
+        SELECT id, tipo, contenido, version, fecha_creacion, vigente
         FROM mision_vision
-        WHERE vigente = 0
         ORDER BY tipo ASC, version DESC
     `;
     const [rows] = await db.execute(query);
     return rows;
+};
+exports.actualizarContenidoVigentePorId = async (id, contenido) => {
+    const query = `
+        UPDATE mision_vision
+        SET contenido = ?
+        WHERE id = ? AND vigente = 1
+    `;
+    const [result] = await db.execute(query, [contenido, id]);
+    return result.affectedRows > 0;
 };
