@@ -11,6 +11,10 @@ const pagoRoutes = require('./routes/pagoRoutes');
 const historialRoutes = require('./routes/historialRoutes');
 const pacienteSinPlataformaRoutes = require('./routes/pacienteSinPlataformaRoutes');
 const misionVisionRoutes = require('./routes/misionVisionRoutes');
+const politicaRoutes = require('./routes/politicaRoutes');
+const valorRoutes = require('./routes/valorRoutes');
+const quienesSomosRoutes = require('./routes/quienesSomosRoutes');
+
 
 const app = express();
 const port = 4000;
@@ -60,7 +64,9 @@ app.use('/api/pagos', pagoRoutes);
 app.use('/api/historial', historialRoutes);
 app.use('/api/pacientes-sin-plataforma', pacienteSinPlataformaRoutes);
 app.use('/api/mision-vision', misionVisionRoutes);
-
+app.use('/api/politicas', politicaRoutes);
+app.use('/api/valores', valorRoutes);
+app.use('/api/quienes-somos', quienesSomosRoutes);
 
 // Manejo de errores CSRF
 app.use((err, req, res, next) => {
