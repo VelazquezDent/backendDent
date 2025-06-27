@@ -24,7 +24,20 @@ exports.listar = async (req, res) => {
     res.status(500).json({ mensaje: "Error al obtener políticas" });
   }
 };
-
+exports.eliminarPolitica = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const eliminado = await politicaModel.eliminarPorId(id);
+    if (eliminado) {
+      res.json({ mensaje: 'Política eliminada correctamente' });
+    } else {
+      res.status(404).json({ mensaje: 'Política no encontrada' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error al eliminar la política' });
+  }
+};
 exports.editar = async (req, res) => {
   try {
     const { id } = req.params;

@@ -17,3 +17,9 @@ exports.editarPorId = async (id, titulo, descripcion) => {
   const [result] = await db.execute(query, [titulo, descripcion, id]);
   return result.affectedRows > 0;
 };
+
+exports.eliminarPorId = async (id) => {
+  const query = `DELETE FROM politicas WHERE id = ?`;
+  const [result] = await db.execute(query, [id]);
+  return result.affectedRows > 0;
+};
