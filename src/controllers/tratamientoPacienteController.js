@@ -352,3 +352,35 @@ exports.obtenerHistorialPorUsuario = async (req, res) => {
         res.status(500).json({ mensaje: 'Error al obtener historial de tratamientos' });
     }
 };
+exports.obtenerCitasPorTratamiento = async (req, res) => {
+    try {
+        const { tratamiento_paciente_id } = req.params;
+
+        const datos = await citaModel.obtenerCitaPorTratamiento(tratamiento_paciente_id);
+
+        if (!datos.length) {
+            return res.status(404).json({ mensaje: 'No se encontraron citas para este tratamiento.' });
+        }
+
+        const nombre_tratamiento = datos[0].nombre_tratamiento;
+
+        const citas = datos.map(cita => ({
+            cita_id: cita.cita_id,
+            fecha_hora: cita.fecha_hora,
+            comentario: cita.comentario,
+            pagada: !!cita.pagada,
+            estado_pago: cita.estado_pago,
+            monto: cita.monto,
+            metodo: cita.metodo
+        }));
+
+        res.status(200).json({
+            tratamiento_paciente_id: parseInt(tratamiento_paciente_id),
+            nombre_tratamiento,
+            citas
+        });
+    } catch (error) {
+        console.error('Error al obtener citas del tratamiento:', error);
+        res.status(500).json({ mensaje: 'Error interno del servidor.' });
+    }
+};

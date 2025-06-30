@@ -46,5 +46,50 @@ exports.obtenerPagosPendientes = async (req, res) => {
         connection.release();
     }
 };
+exports.obtenerPacientesConTratamientoActivo = async (req, res) => {
+    try {
+        const datos = await pagoModel.obtenerPacientesConTratamientoActivo();
 
+        const pacientes = datos.map((paciente) => ({
+            tratamiento_paciente_id: paciente.tratamiento_paciente_id,
+            tipo_paciente: paciente.tipo_paciente,
+            paciente_id: paciente.usuario_id || paciente.paciente_id,
+            nombre_completo: `${paciente.nombre} ${paciente.apellido_paterno} ${paciente.apellido_materno}`
+        }));
+
+        res.status(200).json(pacientes);
+    } catch (error) {
+        console.error('Error al obtener pacientes con tratamiento activo:', error);
+        res.status(500).json({ mensaje: 'Error interno del servidor.' });
+    }
+};
+exports.actualizarPagosYMarcarCitas = async (req, res) => {
+    const connection = await require('../db').getConnection();
+    try {
+        const { ids, metodo, fecha_pago } = req.body;
+
+        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ mensaje: 'IDs de pagos no válidos.' });
+        }
+
+        if (!metodo || !fecha_pago) {
+            return res.status(400).json({ mensaje: 'Faltan campos requeridos: método o fecha de pago.' });
+        }
+
+        await connection.beginTransaction();
+
+        const resultado = await pagoModel.actualizarPagosYMarcarCitas(
+            ids, metodo, fecha_pago, connection
+        );
+
+        await connection.commit();
+        res.status(200).json({ mensaje: 'Pagos y citas actualizados correctamente.', resultado });
+    } catch (error) {
+        await connection.rollback();
+        console.error('❌ Error al actualizar pagos y citas:', error);
+        res.status(500).json({ mensaje: 'Error interno del servidor.' });
+    } finally {
+        connection.release();
+    }
+};
 

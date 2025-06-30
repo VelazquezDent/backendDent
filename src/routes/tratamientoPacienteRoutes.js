@@ -18,5 +18,6 @@ router.post('/crear-nuevas-citas-pagos', tratamientoPacienteController.crearNuev
 router.get('/historial', tratamientoPacienteController.obtenerHistorialTratamientos);
 router.get('/verificar/:tipo/:id', tratamientoPacienteController.verificarTratamientoActivoTipo);
 router.get('/historial/:usuario_id', tratamientoPacienteController.obtenerHistorialPorUsuario);
+router.get('/citas-por-tratamiento/:tratamiento_paciente_id', tratamientoPacienteController.obtenerCitasPorTratamiento);
 
 module.exports = router;

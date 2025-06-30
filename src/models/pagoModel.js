@@ -97,4 +97,50 @@ exports.obtenerPagosPendientesPorUsuario = async (usuarioId, connection) => {
     const [rows] = await connection.query(query, [usuarioId]);
     return rows;
 };
+exports.obtenerPacientesConTratamientoActivo = async () => {
+    const [result] = await db.query(`
+        SELECT tp.id AS tratamiento_paciente_id,
+               tp.usuario_id,
+               tp.paciente_id,
+               CASE 
+                   WHEN tp.usuario_id IS NOT NULL THEN 'web'
+                   ELSE 'sin_plataforma'
+               END AS tipo_paciente,
+               COALESCE(u.nombre, p.nombre) AS nombre,
+               COALESCE(u.apellido_paterno, p.apellido_paterno) AS apellido_paterno,
+               COALESCE(u.apellido_materno, p.apellido_materno) AS apellido_materno
+        FROM tratamientos_pacientes tp
+        LEFT JOIN usuarios u ON tp.usuario_id = u.id
+        LEFT JOIN pacientes_sin_plataforma p ON tp.paciente_id = p.id
+        WHERE tp.estado = 'en progreso'
+    `);
+    return result;
+};
+exports.actualizarPagosYMarcarCitas = async (ids, metodo, fecha_pago, connection) => {
+    if (!ids || ids.length === 0) return;
 
+    // 1. Actualiza los pagos y fuerza el estado como 'pagado'
+    const queryPagos = `
+        UPDATE pagos 
+        SET metodo = ?, fecha_pago = ?, estado = 'pagado'
+        WHERE id IN (?)
+    `;
+    await connection.query(queryPagos, [metodo, fecha_pago, ids]);
+
+    // 2. Obtiene los ID de citas relacionadas
+    const [pagos] = await connection.query(
+        `SELECT cita_id FROM pagos WHERE id IN (?)`,
+        [ids]
+    );
+
+    const citaIds = pagos.map(p => p.cita_id).filter(id => id);
+    if (citaIds.length > 0) {
+        // 3. Marca citas como pagadas
+        await connection.query(
+            `UPDATE citas SET pagada = 1 WHERE id IN (?)`,
+            [citaIds]
+        );
+    }
+
+    return { pagosActualizados: ids.length, citasActualizadas: citaIds.length };
+};

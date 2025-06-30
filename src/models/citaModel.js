@@ -243,3 +243,24 @@ exports.obtenerNotificacionesCitas = async () => {
     return citas;
 };
 
+exports.obtenerCitaPorTratamiento = async (tratamiento_paciente_id) => {
+    const [result] = await db.query(`
+        SELECT 
+            t.nombre AS nombre_tratamiento,
+            c.id AS cita_id,
+            c.fecha_hora,
+            c.comentario,
+            c.pagada,
+            IFNULL(p.estado, 'pendiente') AS estado_pago,
+            IFNULL(p.metodo, NULL) AS metodo,
+            IFNULL(p.monto, 0) AS monto
+        FROM tratamientos_pacientes tp
+        INNER JOIN tratamientos t ON tp.tratamiento_id = t.id
+        INNER JOIN citas c ON c.tratamiento_paciente_id = tp.id
+        LEFT JOIN pagos p ON p.cita_id = c.id
+        WHERE tp.id = ?
+        ORDER BY c.fecha_hora
+    `, [tratamiento_paciente_id]);
+
+    return result;
+};
