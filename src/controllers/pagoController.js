@@ -92,4 +92,12 @@ exports.actualizarPagosYMarcarCitas = async (req, res) => {
         connection.release();
     }
 };
-
+exports.obtenerHistorialPagos = async (req, res) => {
+    try {
+        const historial = await pagoModel.obtenerHistorialPagos();
+        res.status(200).json(historial);
+    } catch (error) {
+        console.error('Error al obtener historial de pagos:', error);
+        res.status(500).json({ mensaje: 'Error interno del servidor.' });
+    }
+};
