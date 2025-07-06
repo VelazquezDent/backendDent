@@ -371,7 +371,10 @@ exports.obtenerCitasPorTratamiento = async (req, res) => {
             pagada: !!cita.pagada,
             estado_pago: cita.estado_pago,
             monto: cita.monto,
-            metodo: cita.metodo
+            metodo: cita.metodo,
+            pago_id: cita.pago_id  // ✅ ¡Aquí estaba el detalle!
+
+
         }));
 
         res.status(200).json({
