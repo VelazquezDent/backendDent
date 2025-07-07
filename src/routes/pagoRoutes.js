@@ -8,5 +8,6 @@ router.get('/pendientes/:usuarioId', pagoController.obtenerPagosPendientes);
 router.get('/pacientes-con-tratamiento', pagoController.obtenerPacientesConTratamientoActivo);
 router.put('/actualizar-pagos', pagoController.actualizarPagosYMarcarCitas);
 router.get('/historial', pagoController.obtenerHistorialPagos);
+router.get('/historial/:usuarioId', pagoController.obtenerHistorialPagos);
 
 module.exports = router;

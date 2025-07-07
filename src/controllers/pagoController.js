@@ -101,3 +101,18 @@ exports.obtenerHistorialPagos = async (req, res) => {
         res.status(500).json({ mensaje: 'Error interno del servidor.' });
     }
 };
+exports.obtenerHistorialPagos = async (req, res) => {
+    try {
+        const { usuarioId } = req.params;
+
+        if (!usuarioId) {
+            return res.status(400).json({ mensaje: 'Falta el ID del usuario' });
+        }
+
+        const historial = await pagoModel.obtenerHistorialPagosPorUsuario(usuarioId);
+        res.status(200).json(historial);
+    } catch (error) {
+        console.error('Error al obtener historial de pagos:', error);
+        res.status(500).json({ mensaje: 'Error interno del servidor.' });
+    }
+};

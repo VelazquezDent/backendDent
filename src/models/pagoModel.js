@@ -168,3 +168,27 @@ exports.obtenerHistorialPagos = async () => {
     const [rows] = await db.query(query);
     return rows;
 };
+exports.obtenerHistorialPagosPorUsuario = async (usuarioId) => {
+    const query = `
+        SELECT 
+            p.id AS pago_id,
+            p.fecha_pago,
+            p.monto,
+            p.metodo,
+            p.estado,
+            CONCAT_WS(' ', COALESCE(u.nombre, ps.nombre), COALESCE(u.apellido_paterno, ps.apellido_paterno), COALESCE(u.apellido_materno, ps.apellido_materno)) AS nombre_paciente,
+            t.nombre AS nombre_tratamiento,
+            c.id AS cita_id,
+            c.fecha_hora AS fecha_cita
+        FROM pagos p
+        LEFT JOIN usuarios u ON p.usuario_id = u.id
+        LEFT JOIN pacientes_sin_plataforma ps ON p.paciente_id = ps.id
+        LEFT JOIN citas c ON p.cita_id = c.id
+        LEFT JOIN tratamientos_pacientes tp ON c.tratamiento_paciente_id = tp.id
+        LEFT JOIN tratamientos t ON tp.tratamiento_id = t.id
+        WHERE p.estado = 'pagado' AND p.usuario_id = ?
+        ORDER BY p.fecha_pago DESC
+    `;
+    const [rows] = await db.query(query, [usuarioId]);
+    return rows;
+};
