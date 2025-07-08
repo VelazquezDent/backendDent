@@ -9,5 +9,7 @@ router.get('/pacientes-con-tratamiento', pagoController.obtenerPacientesConTrata
 router.put('/actualizar-pagos', pagoController.actualizarPagosYMarcarCitas);
 router.get('/historial', pagoController.obtenerHistorialPagos);
 router.get('/historial/:usuarioId', pagoController.obtenerHistorialPagos);
+router.post('/pagar-por-ids', pagoController.pagarPagosPorIds);
+
 
 module.exports = router;

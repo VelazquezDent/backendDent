@@ -116,3 +116,37 @@ exports.obtenerHistorialPagos = async (req, res) => {
         res.status(500).json({ mensaje: 'Error interno del servidor.' });
     }
 };
+exports.pagarPagosPorIds = async (req, res) => {
+    const connection = await require('../db').getConnection();
+    try {
+        const { pagosIds } = req.body;
+
+        if (!pagosIds || !Array.isArray(pagosIds) || pagosIds.length === 0) {
+            return res.status(400).json({ mensaje: 'No se recibieron pagos válidos para procesar.' });
+        }
+
+        await connection.beginTransaction();
+
+        const resultado = await pagoModel.pagarPagosPorIds(pagosIds, connection);
+
+        if (resultado.pagos.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({ mensaje: 'No hay pagos pendientes con esos IDs.' });
+        }
+
+        await connection.commit();
+
+        res.status(200).json({
+            mensaje: `Pagos seleccionados procesados correctamente.`,
+            totalPagado: resultado.pagos.length,
+            fechaPago: resultado.fecha,
+            pagosIds: resultado.pagos
+        });
+    } catch (error) {
+        await connection.rollback();
+        console.error('Error al pagar pagos por IDs:', error);
+        res.status(500).json({ mensaje: 'Error interno del servidor.' });
+    } finally {
+        connection.release();
+    }
+};

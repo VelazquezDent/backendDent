@@ -192,3 +192,34 @@ exports.obtenerHistorialPagosPorUsuario = async (usuarioId) => {
     const [rows] = await db.query(query, [usuarioId]);
     return rows;
 };
+exports.pagarPagosPorIds = async (pagosIds, connection) => {
+    if (!pagosIds || pagosIds.length === 0) {
+        return { pagos: [], citaIds: [] };
+    }
+
+    const [pagos] = await connection.query(
+        `SELECT id, cita_id FROM pagos WHERE id IN (?) AND estado = 'pendiente'`,
+        [pagosIds]
+    );
+
+    if (pagos.length === 0) return { pagos: [], citaIds: [] };
+
+    const ids = pagos.map(p => p.id);
+    const citaIds = pagos.map(p => p.cita_id);
+    const fecha = new Date();
+    const metodo = 'tarjeta';
+
+    await connection.query(
+        `UPDATE pagos SET metodo = ?, fecha_pago = ?, estado = 'pagado' WHERE id IN (?)`,
+        [metodo, fecha, ids]
+    );
+
+    if (citaIds.length > 0) {
+        await connection.query(
+            `UPDATE citas SET pagada = 1 WHERE id IN (?)`,
+            [citaIds]
+        );
+    }
+
+    return { pagos: ids, citaIds, fecha };
+};
