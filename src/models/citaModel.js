@@ -271,18 +271,21 @@ exports.obtenerCitasPorFecha = async (fecha) => {
         SELECT 
             c.id AS cita_id,
             c.fecha_hora,
-            u.nombre AS nombre_paciente,
-            u.apellido_paterno,
-            u.apellido_materno,
+            COALESCE(u.nombre, p.nombre) AS nombre_paciente,
+            COALESCE(u.apellido_paterno, p.apellido_paterno) AS apellido_paterno,
+            COALESCE(u.apellido_materno, p.apellido_materno) AS apellido_materno,
             t.nombre AS tratamiento
         FROM citas c
         JOIN tratamientos_pacientes tp ON c.tratamiento_paciente_id = tp.id
-        JOIN usuarios u ON tp.usuario_id = u.id
+        LEFT JOIN usuarios u ON tp.usuario_id = u.id
+        LEFT JOIN pacientes_sin_plataforma p ON tp.paciente_id = p.id
         JOIN tratamientos t ON tp.tratamiento_id = t.id
         WHERE DATE(c.fecha_hora) = ?
+          AND c.fecha_hora IS NOT NULL
         ORDER BY c.fecha_hora ASC
     `;
     const [rows] = await db.execute(query, [fecha]);
     return rows;
 };
+
 

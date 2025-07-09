@@ -16,13 +16,22 @@ router.post('/proximas-citas', async (req, res) => {
       return res.json({ response: `No hay citas para el ${fecha}.` });
     }
 
-    const mensaje = citas.map(cita => {
+    const cantidad = citas.length;
+    const encabezado = cantidad === 1
+      ? `Tienes una cita para el ${fecha}. `
+      : `Tienes ${cantidad} citas para el ${fecha}. `;
+
+    const detalles = citas.map(cita => {
       const hora = new Date(cita.fecha_hora).toLocaleTimeString('es-MX', {
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
+        hour12: false
       });
-      return `${cita.nombre_paciente} tiene cita para ${cita.tratamiento} a las ${hora}`;
+      const nombreCompleto = `${cita.nombre_paciente} ${cita.apellido_paterno} ${cita.apellido_materno}`.trim();
+      return `${nombreCompleto} tiene cita para ${cita.tratamiento} a las ${hora}`;
     }).join('. ');
+
+    const mensaje = encabezado + detalles + '.';
 
     res.json({ response: mensaje });
 
@@ -31,5 +40,6 @@ router.post('/proximas-citas', async (req, res) => {
     res.status(500).json({ response: 'Ocurrió un error al consultar las citas.' });
   }
 });
+
 
 module.exports = router;
