@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const csrf = require('csurf'); // Importar csurf
-
+const alexaRoutes = require('./routes/alexaRoutes');
+// Importar las rutas de los diferentes módulos
 const usuarioRoutes = require('./routes/usuarioRoutes');
 const tratamientoRoutes = require('./routes/tratamientoRoutes');
 const citaRoutes = require('./routes/citaRoutes');
@@ -43,8 +44,10 @@ const csrfProtection = csrf({
 });
 
 // ✅ Lista de rutas excluidas de CSRF (por ejemplo: llamadas desde Alexa)
-const csrfExcludedRoutes = ['/api/citas/por-fecha'];
-
+const csrfExcludedRoutes = [
+  '/api/citas/por-fecha',
+  '/api/alexa/proximas-citas' // ✅ Esta ruta nueva
+];
 // ✅ Middleware para aplicar CSRF condicionalmente
 app.use((req, res, next) => {
   if (csrfExcludedRoutes.includes(req.path)) {
@@ -77,6 +80,8 @@ app.use('/api/mision-vision', misionVisionRoutes);
 app.use('/api/politicas', politicaRoutes);
 app.use('/api/valores', valorRoutes);
 app.use('/api/quienes-somos', quienesSomosRoutes);
+app.use('/api/alexa', alexaRoutes);
+
 
 // 🔐 Manejo de errores CSRF
 app.use((err, req, res, next) => {
