@@ -15,7 +15,6 @@ const politicaRoutes = require('./routes/politicaRoutes');
 const valorRoutes = require('./routes/valorRoutes');
 const quienesSomosRoutes = require('./routes/quienesSomosRoutes');
 
-
 const app = express();
 const port = 4000;
 
@@ -27,35 +26,46 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: ['http://localhost:5173', 'https://consultoriovelazquezmcd.com'], // Permite peticiones desde estas URLs
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
-    credentials: true, // Permitir el envío de cookies y encabezados de autenticación
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-XSRF-TOKEN'], // Incluir CSRF en los headers
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-XSRF-TOKEN'],
   })
 );
 
-// Configuración de CSRF usando cookies
+// Configuración del middleware CSRF (usa cookies)
 const csrfProtection = csrf({
   cookie: {
-    httpOnly: false,  // Permitir acceso desde el frontend
-    secure: true,     // Cambiado a true para HTTPS en producción
-    sameSite: 'None', // Cambiado a 'None' para permitir cookies entre dominios
-    path: '/',        // Asegurar disponibilidad en todas las rutas
+    httpOnly: false,  // Permitir acceso desde frontend
+    secure: true,     // true en producción HTTPS
+    sameSite: 'None', // Necesario para dominios cruzados
+    path: '/',
   }
 });
-app.use(csrfProtection);  // Aplicar la protección CSRF en toda la app
 
-// Ruta para obtener el token CSRF
+// ✅ Lista de rutas excluidas de CSRF (por ejemplo: llamadas desde Alexa)
+const csrfExcludedRoutes = ['/api/citas/por-fecha'];
+
+// ✅ Middleware para aplicar CSRF condicionalmente
+app.use((req, res, next) => {
+  if (csrfExcludedRoutes.includes(req.path)) {
+    return next(); // No aplicar CSRF
+  } else {
+    return csrfProtection(req, res, next); // Aplicar CSRF normalmente
+  }
+});
+
+// ✅ Ruta pública para obtener el token CSRF
 app.get('/api/get-csrf-token', (req, res) => {
   res.cookie('XSRF-TOKEN', req.csrfToken(), {
-    httpOnly: false,  // El frontend debe poder acceder a esta cookie
-    secure: true,     // Cambiado a true para HTTPS
-    sameSite: 'None', // Cambiado a 'None' para permitir cookies entre dominios
+    httpOnly: false,
+    secure: true,
+    sameSite: 'None',
     path: '/',
   });
   res.json({ csrfToken: req.csrfToken() });
 });
 
-// Rutas protegidas con CSRF
+// ✅ Rutas protegidas (excepto las excluidas)
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/tratamientos', tratamientoRoutes);
 app.use('/api/citas', citaRoutes);
@@ -68,16 +78,16 @@ app.use('/api/politicas', politicaRoutes);
 app.use('/api/valores', valorRoutes);
 app.use('/api/quienes-somos', quienesSomosRoutes);
 
-// Manejo de errores CSRF
+// 🔐 Manejo de errores CSRF
 app.use((err, req, res, next) => {
-  if (err.code === 'EBADCSRFTOKEN') {  
+  if (err.code === 'EBADCSRFTOKEN') {
     return res.status(403).json({ message: 'Fallo en la validación del CSRF token' });
   }
   console.error('Error:', err.stack);
   res.status(500).send('¡Algo salió mal en el servidor!');
 });
 
-// Iniciar el servidor
+// 🚀 Iniciar el servidor
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
 });
