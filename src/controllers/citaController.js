@@ -173,3 +173,18 @@ exports.obtenerNotificacionesCitas = async (req, res) => {
     }
 };
 
+exports.obtenerCitasPorFecha = async (req, res) => {
+    try {
+        const { fecha } = req.body;
+
+        if (!fecha) {
+            return res.status(400).json({ mensaje: "La fecha es requerida" });
+        }
+
+        const citas = await citaModel.obtenerCitasPorFecha(fecha);
+        res.status(200).json({ citas });
+    } catch (error) {
+        console.error("❌ Error al obtener citas por fecha:", error);
+        res.status(500).json({ mensaje: "Error al obtener las citas por fecha" });
+    }
+};

@@ -265,3 +265,24 @@ exports.obtenerCitaPorTratamiento = async (tratamiento_paciente_id) => {
 
   return result;
 };
+
+exports.obtenerCitasPorFecha = async (fecha) => {
+    const query = `
+        SELECT 
+            c.id AS cita_id,
+            c.fecha_hora,
+            u.nombre AS nombre_paciente,
+            u.apellido_paterno,
+            u.apellido_materno,
+            t.nombre AS tratamiento
+        FROM citas c
+        JOIN tratamientos_pacientes tp ON c.tratamiento_paciente_id = tp.id
+        JOIN usuarios u ON tp.usuario_id = u.id
+        JOIN tratamientos t ON tp.tratamiento_id = t.id
+        WHERE DATE(c.fecha_hora) = ?
+        ORDER BY c.fecha_hora ASC
+    `;
+    const [rows] = await db.execute(query, [fecha]);
+    return rows;
+};
+
