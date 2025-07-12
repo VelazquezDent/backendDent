@@ -10,6 +10,7 @@ router.put('/actualizar-pagos', pagoController.actualizarPagosYMarcarCitas);
 router.get('/historial', pagoController.obtenerHistorialPagos);
 router.get('/historial/:usuarioId', pagoController.obtenerHistorialPagos);
 router.post('/pagar-por-ids', pagoController.pagarPagosPorIds);
+router.post('/crear-checkout', pagoController.crearCheckoutStripe);
 
 
 module.exports = router;
