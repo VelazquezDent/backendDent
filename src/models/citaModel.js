@@ -189,22 +189,70 @@ exports.obtenerCitaPorId = async (id) => {
     return rows.length > 0 ? rows[0] : null;
 };
 
-// Marcar cita como completada y agregar comentario
+// Marcar cita como completada y aumentar citas asistidas
 exports.marcarCitaComoCompletada = async (id, comentario) => {
-    const query = `
-        UPDATE citas 
-        SET estado = 'completada', comentario = ? 
-        WHERE id = ?;
-    `;
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
 
-    console.log("🛠️ Ejecutando consulta SQL:", query, "con valores:", [comentario, id]); // 🔹 LOG para debug
+        // 1. Marcar cita como completada
+        const updateCitaQuery = `
+            UPDATE citas 
+            SET estado = 'completada', comentario = ?
+            WHERE id = ?;
+        `;
+        await connection.execute(updateCitaQuery, [comentario, id]);
 
-    const [resultado] = await db.execute(query, [comentario, id]);
+        // 2. Obtener el tratamiento_paciente_id desde la cita
+        const getCitaQuery = `SELECT tratamiento_paciente_id FROM citas WHERE id = ?`;
+        const [citaResult] = await connection.execute(getCitaQuery, [id]);
+        if (!citaResult.length) throw new Error("Cita no encontrada");
 
-    console.log("🔎 Resultado de la actualización:", resultado); // 🔹 LOG de resultado
+        const tratamientoPacienteId = citaResult[0].tratamiento_paciente_id;
 
-    return resultado;
+        // 3. Obtener datos actuales del tratamiento
+        const getTratamientoQuery = `
+            SELECT citas_asistidas, citas_totales 
+            FROM tratamientos_pacientes 
+            WHERE id = ?;
+        `;
+        const [tratamientoResult] = await connection.execute(getTratamientoQuery, [tratamientoPacienteId]);
+        if (!tratamientoResult.length) throw new Error("Tratamiento del paciente no encontrado");
+
+        const { citas_asistidas, citas_totales } = tratamientoResult[0];
+
+        // 4. Aumentar citas asistidas si aún no se alcanza el total
+        if (citas_asistidas < citas_totales) {
+            await connection.execute(`
+                UPDATE tratamientos_pacientes 
+                SET citas_asistidas = citas_asistidas + 1 
+                WHERE id = ?;
+            `, [tratamientoPacienteId]);
+        }
+
+        // 5. Verificar si ya están completas todas las citas
+        const nuevasAsistidas = citas_asistidas + 1;
+        if (nuevasAsistidas >= citas_totales) {
+            await connection.execute(`
+                UPDATE tratamientos_pacientes 
+                SET estado = 'terminado',
+                    fecha_finalizacion = CURRENT_DATE()
+                WHERE id = ?;
+            `, [tratamientoPacienteId]);
+        }
+
+        await connection.commit();
+        return { success: true, mensaje: 'Cita completada y tratamiento actualizado' };
+    } catch (error) {
+        await connection.rollback();
+        console.error("❌ Error al completar cita:", error);
+        return { success: false, mensaje: 'Error al completar cita', error };
+    } finally {
+        connection.release();
+    }
 };
+
+
 exports.actualizarFechaHoraCita = async (id, fechaHora) => {
     // Primero obtenemos la información actual de la cita
     const querySelect = `SELECT estado, pagada FROM citas WHERE id = ?`;
