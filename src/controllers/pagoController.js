@@ -26,8 +26,8 @@ exports.crearCheckoutStripe = async (req, res) => {
       payment_method_types: ['card'],
       line_items,
       mode: 'payment',
-      success_url: `http://localhost:5173/pagos-exito?ids=${pagos.map(p => p.id).join(",")}`,
-      cancel_url: 'http://localhost:5173/pagos-cancelado',
+      success_url: `https://consultoriovelazquezmcd.com/pagos-exito?ids=${pagos.map(p => p.id).join(",")}`,
+      cancel_url: 'https://consultoriovelazquezmcd.com/pagos-cancelado',
     });
 
     res.json({ url: session.url });
