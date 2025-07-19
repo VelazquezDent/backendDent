@@ -8,7 +8,7 @@ exports.crear = async (req, res) => {
     }
 
     const id = await quienesSomosModel.insertar(contenido);
-    res.status(201).json({ mensaje: "Contenido registrado", id });
+    res.status(201).json({ mensaje: "Contenido registrado como vigente", id });
   } catch (error) {
     console.error("❌ Error al registrar quienes somos:", error);
     res.status(500).json({ mensaje: "Error interno al registrar contenido" });
@@ -22,6 +22,16 @@ exports.listar = async (req, res) => {
   } catch (error) {
     console.error("❌ Error al obtener quienes somos:", error);
     res.status(500).json({ mensaje: "Error al obtener contenido" });
+  }
+};
+
+exports.obtenerVigente = async (req, res) => {
+  try {
+    const actual = await quienesSomosModel.obtenerVigente();
+    res.status(200).json(actual);
+  } catch (error) {
+    console.error("❌ Error al obtener vigente:", error);
+    res.status(500).json({ mensaje: "Error al obtener contenido vigente" });
   }
 };
 
@@ -43,5 +53,19 @@ exports.editar = async (req, res) => {
   } catch (error) {
     console.error("❌ Error al editar quienes somos:", error);
     res.status(500).json({ mensaje: "Error interno al editar contenido" });
+  }
+};
+
+exports.activar = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ok = await quienesSomosModel.activarComoVigente(id);
+    if (!ok) {
+      return res.status(404).json({ mensaje: "No se encontró el contenido para activar." });
+    }
+    res.status(200).json({ mensaje: "Contenido activado como vigente." });
+  } catch (error) {
+    console.error("❌ Error al activar vigente:", error);
+    res.status(500).json({ mensaje: "Error al activar contenido como vigente" });
   }
 };

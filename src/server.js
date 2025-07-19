@@ -15,6 +15,8 @@ const misionVisionRoutes = require('./routes/misionVisionRoutes');
 const politicaRoutes = require('./routes/politicaRoutes');
 const valorRoutes = require('./routes/valorRoutes');
 const quienesSomosRoutes = require('./routes/quienesSomosRoutes');
+const valoresRoutes = require('./routes/valoresRoutes'); // Importar las rutas de valores
+const ConfiguracionesRoutes = require('./routes/configuracionesRoutes'); // Importar las rutas de configuraciones
 
 const app = express();
 const port = 4000;
@@ -81,6 +83,8 @@ app.use('/api/politicas', politicaRoutes);
 app.use('/api/valores', valorRoutes);
 app.use('/api/quienes-somos', quienesSomosRoutes);
 app.use('/api/alexa', alexaRoutes);
+app.use('/api/valores', valoresRoutes); // Usar las rutas de valores
+app.use('/api/configuraciones', ConfiguracionesRoutes); // Usar las rutas de configuraciones
 
 
 // 🔐 Manejo de errores CSRF
