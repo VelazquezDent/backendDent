@@ -128,7 +128,7 @@ exports.actualizarPagosYMarcarCitas = async (req, res) => {
         connection.release();
     }
 };
-exports.obtenerHistorialPagos = async (req, res) => {
+exports.obtenerHistorialPagosAdmin = async (req, res) => {
     try {
         const historial = await pagoModel.obtenerHistorialPagos();
         res.status(200).json(historial);
