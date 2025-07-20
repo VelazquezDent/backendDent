@@ -48,7 +48,8 @@ const csrfProtection = csrf({
 // ✅ Lista de rutas excluidas de CSRF (por ejemplo: llamadas desde Alexa)
 const csrfExcludedRoutes = [
   '/api/citas/por-fecha',
-  '/api/alexa/proximas-citas' // ✅ Esta ruta nueva
+  '/api/alexa/proximas-citas',
+  '/api/alexa/login'      // Excluye el login de CSRF // ✅ Esta ruta nueva
 ];
 // ✅ Middleware para aplicar CSRF condicionalmente
 app.use((req, res, next) => {
