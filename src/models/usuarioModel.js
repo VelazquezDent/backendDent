@@ -171,6 +171,7 @@ const obtenerDatosParaPrediccion = async () => {
   const [rows] = await db.query(`
     SELECT 
       u.id,
+      CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS nombre_completo,
       TIMESTAMPDIFF(YEAR, u.fecha_nacimiento, CURDATE()) AS edad,
       tp.citas_totales,
       tp.citas_asistidas,
@@ -180,14 +181,17 @@ const obtenerDatosParaPrediccion = async () => {
         WHERE p.usuario_id = u.id
         ORDER BY p.fecha_pago DESC
         LIMIT 1
-      ) AS monto_ultimo_pago
+      ) AS monto_ultimo_pago,
+      t.nombre AS nombre_tratamiento
     FROM usuarios u
     JOIN tratamientos_pacientes tp ON tp.usuario_id = u.id
+    JOIN tratamientos t ON tp.tratamiento_id = t.id
     WHERE u.tipo = 'paciente'
   `);
 
   return rows;
 };
+
 module.exports = {
     crearUsuario,
     guardarHistorialContrasena,
