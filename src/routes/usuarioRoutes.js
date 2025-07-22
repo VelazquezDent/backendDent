@@ -30,6 +30,6 @@ router.get('/perfil/:id', usuarioController.obtenerPerfilUsuario);
 // Ruta para cambiar la contraseña por ID
 router.post('/cambiar-password/:id', usuarioController.cambiarPasswordPorId);
 
-
+router.get('/prediccion-pacientes', usuarioController.obtenerPacientesParaPrediccion);
 
 module.exports = router;

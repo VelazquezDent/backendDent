@@ -395,7 +395,22 @@ const cambiarPasswordPorId = async (req, res) => {
         res.status(500).json({ mensaje: 'Error interno del servidor.' });
     }
 };
+const obtenerPacientesParaPrediccion = async (req, res) => {
+  try {
+    const pacientes = await userModel.obtenerDatosParaPrediccion();
+    const diaSemana = new Date().getDay();
 
+    const pacientesConDia = pacientes.map(p => ({
+      ...p,
+      dia_semana: diaSemana
+    }));
+
+    res.json(pacientesConDia);
+  } catch (error) {
+    console.error('❌ Error al obtener pacientes para predicción:', error);
+    res.status(500).json({ error: 'Error al obtener datos para predicción' });
+  }
+};
 
 module.exports = { 
     buscarUsuario, 
@@ -408,4 +423,7 @@ module.exports = {
     verificarSesion,
     obtenerPacientes,
     obtenerPerfilUsuario,
-    cambiarPasswordPorId};
+    cambiarPasswordPorId,
+    obtenerPacientesParaPrediccion,
+
+};

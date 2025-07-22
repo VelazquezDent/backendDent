@@ -28,7 +28,7 @@ app.use(cookieParser());
 // Configuración de CORS
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'https://consultoriovelazquezmcd.com', 'https://developer.amazon.com'], // Permite peticiones desde estas URLs
+    origin: ['http://localhost:5173', 'https://consultoriovelazquezmcd.com', 'https://developer.amazon.com','https://predicciondentista.onrender.com'], // Permite peticiones desde estas URLs
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'X-XSRF-TOKEN'],

@@ -167,7 +167,27 @@ const obtenerUsuarioPorId = async (id) => {
     const [result] = await db.execute(query, [id]);
     return result.length > 0 ? result[0] : null;
 };
+const obtenerDatosParaPrediccion = async () => {
+  const [rows] = await db.query(`
+    SELECT 
+      u.id,
+      TIMESTAMPDIFF(YEAR, u.fecha_nacimiento, CURDATE()) AS edad,
+      tp.citas_totales,
+      tp.citas_asistidas,
+      (
+        SELECT p.monto
+        FROM pagos p
+        WHERE p.usuario_id = u.id
+        ORDER BY p.fecha_pago DESC
+        LIMIT 1
+      ) AS monto_ultimo_pago
+    FROM usuarios u
+    JOIN tratamientos_pacientes tp ON tp.usuario_id = u.id
+    WHERE u.tipo = 'paciente'
+  `);
 
+  return rows;
+};
 module.exports = {
     crearUsuario,
     guardarHistorialContrasena,
@@ -184,5 +204,6 @@ module.exports = {
     buscarEnUsuarios,
     buscarEnPacientesSinPlataforma,
     obtenerTodosLosPacientes,
-    obtenerUsuarioPorId
+    obtenerUsuarioPorId,
+    obtenerDatosParaPrediccion
 };
