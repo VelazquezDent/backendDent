@@ -17,6 +17,7 @@ const valorRoutes = require('./routes/valorRoutes');
 const quienesSomosRoutes = require('./routes/quienesSomosRoutes');
 const valoresRoutes = require('./routes/valoresRoutes'); // Importar las rutas de valores
 const ConfiguracionesRoutes = require('./routes/configuracionesRoutes'); // Importar las rutas de configuraciones
+const reportesRoutes = require('./routes/reportesRoutes');
 
 const app = express();
 const port = 4000;
@@ -86,6 +87,7 @@ app.use('/api/quienes-somos', quienesSomosRoutes);
 app.use('/api/alexa', alexaRoutes);
 app.use('/api/valores', valoresRoutes); // Usar las rutas de valores
 app.use('/api/configuraciones', ConfiguracionesRoutes); // Usar las rutas de configuraciones
+app.use('/api/reportes', reportesRoutes);
 
 
 // 🔐 Manejo de errores CSRF
