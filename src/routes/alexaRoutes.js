@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const citaModel = require('../models/citaModel');
 const userModel = require('../models/usuarioModel');
+const codigoSesionModel = require('../models/codigoSesionModel');
+
 const { validarCorreo } = require('../utils/validations');
 const bcrypt = require('bcrypt');
 
@@ -92,5 +94,28 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ success: false, mensaje: 'Error interno del servidor.' });
   }
 });
+
+router.post('/login-codigo', async (req, res) => {
+  try {
+    const { codigo } = req.body;
+
+    if (!codigo || !codigo.trim()) {
+      return res.status(400).json({ success: false, mensaje: 'El código es obligatorio.' });
+    }
+
+    const existe = await codigoSesionModel.existeCodigo(codigo.trim());
+
+    if (!existe) {
+      return res.status(401).json({ success: false, mensaje: 'Código inválido o no autorizado.' });
+    }
+
+    res.status(200).json({ success: true, mensaje: 'Acceso autorizado con código.' });
+
+  } catch (error) {
+    console.error('Error en login con código:', error);
+    res.status(500).json({ success: false, mensaje: 'Error interno del servidor.' });
+  }
+});
+
 
 module.exports = router;
