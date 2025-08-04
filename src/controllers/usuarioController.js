@@ -400,10 +400,16 @@ const obtenerPacientesParaPrediccion = async (req, res) => {
     const pacientes = await userModel.obtenerDatosParaPrediccion();
     const diaSemana = new Date().getDay();
 
-    const pacientesConDia = pacientes.map(p => ({
-      ...p,
-      dia_semana: diaSemana
-    }));
+    const pacientesConDia = pacientes.map(p => {
+  const fecha = new Date(p.proxima_cita);
+  const diaSemana = fecha.getDay(); // 0 = domingo, 1 = lunes, etc.
+
+  return {
+    ...p,
+    dia_semana: diaSemana
+  };
+});
+
 
     res.json(pacientesConDia);
   } catch (error) {

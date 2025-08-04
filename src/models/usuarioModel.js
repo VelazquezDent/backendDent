@@ -169,24 +169,32 @@ const obtenerUsuarioPorId = async (id) => {
 };
 const obtenerDatosParaPrediccion = async () => {
   const [rows] = await db.query(`
-    SELECT 
-      u.id,
-      CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS nombre_completo,
-      TIMESTAMPDIFF(YEAR, u.fecha_nacimiento, CURDATE()) AS edad,
-      tp.citas_totales,
-      tp.citas_asistidas,
-      (
-        SELECT p.monto
-        FROM pagos p
-        WHERE p.usuario_id = u.id
-        ORDER BY p.fecha_pago DESC
-        LIMIT 1
-      ) AS monto_ultimo_pago,
-      t.nombre AS nombre_tratamiento
-    FROM usuarios u
-    JOIN tratamientos_pacientes tp ON tp.usuario_id = u.id
-    JOIN tratamientos t ON tp.tratamiento_id = t.id
-    WHERE u.tipo = 'paciente'
+   SELECT 
+  u.id,
+  CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS nombre_completo,
+  TIMESTAMPDIFF(YEAR, u.fecha_nacimiento, CURDATE()) AS edad,
+  tp.citas_totales,
+  tp.citas_asistidas,
+  (
+    SELECT p.monto
+    FROM pagos p
+    WHERE p.usuario_id = u.id
+    ORDER BY p.fecha_pago DESC
+    LIMIT 1
+  ) AS monto_ultimo_pago,
+  t.nombre AS nombre_tratamiento,
+  (
+    SELECT c.fecha_hora
+    FROM citas c
+    WHERE c.tratamiento_paciente_id = tp.id AND c.estado = 'pendiente'
+    ORDER BY c.fecha_hora ASC
+    LIMIT 1
+  ) AS proxima_cita
+FROM usuarios u
+JOIN tratamientos_pacientes tp ON tp.usuario_id = u.id
+JOIN tratamientos t ON tp.tratamiento_id = t.id
+WHERE u.tipo = 'paciente'
+
   `);
 
   return rows;
