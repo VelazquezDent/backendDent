@@ -4,13 +4,17 @@ require('dotenv').config();
 // Configuración de transporte SMTP para Hostinger usando variables de entorno
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT, 10),   // Convierte el puerto a número
-    secure: process.env.SMTP_SECURE === 'true',  // Convierte el valor de secure a booleano
+    port: parseInt(process.env.SMTP_PORT, 10),
+    secure: process.env.SMTP_SECURE === 'true',
     auth: {
-        user: process.env.SMTP_USER,  // Correo desde el .env
-        pass: process.env.SMTP_PASS,  // Contraseña desde el .env
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+    },
+    tls: {
+        rejectUnauthorized: false, // 🔹 evitar problemas de certificado en Render
     },
 });
+
 
 // Función para enviar correos
 const enviarCorreo = async (destinatario, asunto, mensaje) => {
