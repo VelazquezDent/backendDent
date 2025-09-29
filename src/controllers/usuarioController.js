@@ -1,4 +1,7 @@
 const userModel = require('../models/usuarioModel');
+const jwt = require('jsonwebtoken');   
+const JWT_SECRET = process.env.JWT_SECRET || 'secreto_super_seguro';
+
 const {
     validarFortalezaContrasena,
     validarNombre,
@@ -194,7 +197,60 @@ const loginUsuario = async (req, res) => {
         res.status(500).json({ mensaje: 'Error interno del servidor.' });
     }
 };
+const loginPacienteMovil = async (req, res) => {
+    try {
+        const { email, password } = req.body;
 
+        // Validaciones
+        const errores = [];
+        const errorCorreo = validarCorreo(email);
+        if (errorCorreo) errores.push(errorCorreo);
+        if (!password || !password.trim()) errores.push("La contraseña es obligatoria");
+
+        if (errores.length > 0) {
+            return res.status(400).json({ errores });
+        }
+
+        // Buscar usuario
+        const usuario = await userModel.obtenerUsuarioPorEmail(email);
+        if (!usuario || usuario.verificado !== 1) {
+            return res.status(401).json({ mensaje: 'Usuario no verificado o inexistente.' });
+        }
+
+        // Validar tipo paciente
+        if (usuario.tipo !== 'paciente') {
+            return res.status(403).json({ mensaje: 'Solo pacientes pueden acceder desde la app móvil.' });
+        }
+
+        // Validar contraseña
+        const esValida = await bcrypt.compare(password, usuario.password);
+        if (!esValida) {
+            return res.status(401).json({ mensaje: 'Correo o contraseña incorrectos.' });
+        }
+
+        // Generar JWT
+        const token = jwt.sign(
+            { id: usuario.id, tipo: usuario.tipo },
+            JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        // Respuesta
+        res.status(200).json({
+            mensaje: 'Inicio de sesión exitoso',
+            token,
+            usuario: {
+                id: usuario.id,
+                nombre: usuario.nombre,
+                email: usuario.email,
+                tipo: usuario.tipo
+            }
+        });
+    } catch (error) {
+        console.error('Error login móvil:', error);
+        res.status(500).json({ mensaje: 'Error interno del servidor.' });
+    }
+};
 // Función para cerrar sesión
 const logoutUsuario = (req, res) => {
     try {
@@ -287,6 +343,16 @@ const verificarSesion = (req, res) => {
         res.status(500).json({ mensaje: 'Error al verificar la sesión.' });
     }
 };
+const verificarSesionMovil = (req, res) => {
+    try {
+        // req.usuario viene de authMovil
+        res.status(200).json({ usuario: req.usuario });
+    } catch (error) {
+        console.error('Error al verificar la sesión (móvil):', error);
+        res.status(500).json({ mensaje: 'Error al verificar la sesión móvil.' });
+    }
+};
+
 const buscarUsuario = async (req, res) => {
     try {
         const { nombre, apellido_paterno, apellido_materno, fecha_nacimiento, email, telefono } = req.body;
@@ -431,5 +497,6 @@ module.exports = {
     obtenerPerfilUsuario,
     cambiarPasswordPorId,
     obtenerPacientesParaPrediccion,
-
+    loginPacienteMovil ,
+    verificarSesionMovil
 };

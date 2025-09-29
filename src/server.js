@@ -51,7 +51,9 @@ const csrfExcludedRoutes = [
   '/api/citas/por-fecha',
   '/api/alexa/proximas-citas',
   '/api/alexa/login',      // Excluye el login de CSRF // ✅ Esta ruta nueva
-  '/api/alexa/login-codigo' // Excluye el login con código de CSRF
+  '/api/alexa/login-codigo', // Excluye el login con código de CSRF
+  '/api/usuarios/login-movil',          // ⬅️ Login móvil
+  '/api/usuarios/movil/verificar-sesion' 
 ];
 // ✅ Middleware para aplicar CSRF condicionalmente
 app.use((req, res, next) => {
