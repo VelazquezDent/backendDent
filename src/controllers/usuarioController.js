@@ -281,14 +281,18 @@ const enviarCorreoRecuperacion = async (req, res) => {
 
         // Enviar el correo con el enlace de recuperación
         const enlaceRecuperacion = `https://consultoriovelazquezmcd.com/cambiar-password?token=${token}`;
+        // Enviar correo
         await enviarCorreo(
             email,
             'Recuperación de contraseña',
             `
             <p>Hola ${usuario.nombre},</p>
-            <p>Haz solicitado recuperar tu contraseña. Haz clic en el siguiente enlace para cambiarla:</p>
-            <a href="${enlaceRecuperacion}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Cambiar contraseña</a>
-            <p>Este enlace es válido por 15 minutos.</p>
+            <p>Haz solicitado recuperar tu contraseña.</p>
+            <p><b>Opción 1 (Web):</b> Haz clic en el siguiente enlace para cambiarla:</p>
+            <a href="${enlaceRecuperacion}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Cambiar contraseña en la web</a>
+            <p><b>Opción 2 (App móvil):</b> Copia este código y pégalo en la app:</p>
+            <p style="font-size: 18px; font-weight: bold; color: #003087;">${token}</p>
+            <p>Este enlace o código son válidos por 15 minutos.</p>
             `
         );
 
