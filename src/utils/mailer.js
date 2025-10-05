@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 /* 
-   ⚠️ NOTA:
+   NOTA:
    Ya no necesitas usar esta parte porque Render no puede conectarse a Hostinger SMTP.
    La dejamos comentada por si en un futuro lo quieres usar localmente.
 */
@@ -42,7 +42,7 @@ const enviarCorreo = async (destinatario, asunto, mensaje) => {
 */
 
 /* 
-   ✅ NUEVO: usar el servicio en Vercel.
+   NUEVO: usar el servicio en Vercel.
    Con esto tu backend en Render le manda la petición al endpoint
    https://emailvercel-xxxx.vercel.app/api/send-email
 */

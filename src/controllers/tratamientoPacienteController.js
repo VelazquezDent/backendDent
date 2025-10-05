@@ -10,12 +10,12 @@ exports.crearTratamientoCompleto = async (req, res) => {
     try {
         const { usuarioId, pacienteId, tratamientoId, citasTotales, fechaInicio, precio, requiereEvaluacion } = req.body;
 
-        console.log("📌 Iniciando creación de tratamiento...");
+        console.log(" Iniciando creación de tratamiento...");
         console.log("📥 Datos recibidos:", { usuarioId, pacienteId, tratamientoId, citasTotales, fechaInicio, precio, requiereEvaluacion });
 
-        // ✅ Validación correcta de datos obligatorios
+        // Validación correcta de datos obligatorios
         if ((usuarioId === null && pacienteId === null) || !tratamientoId || !precio || (!requiereEvaluacion && citasTotales < 1)) {
-            throw new Error("❌ Datos inválidos: Se requiere un usuario o un paciente sin plataforma.");
+            throw new Error(" Datos inválidos: Se requiere un usuario o un paciente sin plataforma.");
         }
 
         // 1️⃣ **Crear el tratamiento del paciente o paciente sin plataforma**
@@ -30,7 +30,7 @@ exports.crearTratamientoCompleto = async (req, res) => {
         }, connection);
 
         if (!tratamientoPacienteId) {
-            throw new Error("❌ Error: No se pudo crear el tratamiento.");
+            throw new Error(" Error: No se pudo crear el tratamiento.");
         }
 
         console.log(`✔️ Tratamiento creado con ID: ${tratamientoPacienteId}`);
@@ -66,10 +66,10 @@ exports.crearTratamientoCompleto = async (req, res) => {
         const citasCreadas = await citaModel.obtenerCitasPorTratamiento(tratamientoPacienteId, connection);
 
         if (citasCreadas.length === 0) {
-            throw new Error("❌ No se obtuvieron citas después de la inserción.");
+            throw new Error(" No se obtuvieron citas después de la inserción.");
         }
 
-        console.log("📌 Citas creadas después de la inserción:", citasCreadas);
+        console.log(" Citas creadas después de la inserción:", citasCreadas);
 
         // 5️⃣ **Crear pagos para TODAS las citas**
         const pagos = citasCreadas.map(cita => ({
@@ -83,11 +83,11 @@ exports.crearTratamientoCompleto = async (req, res) => {
         }));
 
         if (pagos.length > 0) {
-            console.log("📌 Generando pagos para citas:", pagos);
+            console.log(" Generando pagos para citas:", pagos);
             await pagoModel.crearPagos(pagos, connection);
             console.log(`✔️ ${pagos.length} pagos creados correctamente.`);
         } else {
-            console.warn("⚠️ No hay pagos para insertar.");
+            console.warn("No hay pagos para insertar.");
         }
 
         res.status(201).json({
@@ -99,7 +99,7 @@ exports.crearTratamientoCompleto = async (req, res) => {
 
     } catch (error) {
         await connection.rollback();
-        console.error('❌ Error al crear el tratamiento:', error.message);
+        console.error(' Error al crear el tratamiento:', error.message);
         res.status(500).json({ mensaje: error.message });
     } finally {
         connection.release();
@@ -151,7 +151,7 @@ exports.verificarTratamientoActivo = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("❌ Error al verificar tratamiento activo:", error);
+        console.error(" Error al verificar tratamiento activo:", error);
         res.status(500).json({ mensaje: "Error al verificar el tratamiento activo." });
     }
 };
@@ -171,7 +171,7 @@ exports.verificarTratamientoActivoTipo = async (req, res) => {
             tratamientoActivo = await tratamientoPacienteModel.tieneTratamientoActivoTipo(id, 'paciente_sin_plataforma');
             haCompletado = await tratamientoPacienteModel.haCompletadoTratamientoTipo(id, 'paciente_sin_plataforma');
         } else {
-            return res.status(400).json({ mensaje: "❌ Tipo de usuario no válido." });
+            return res.status(400).json({ mensaje: " Tipo de usuario no válido." });
         }
 
         if (tratamientoActivo) {
@@ -191,7 +191,7 @@ exports.verificarTratamientoActivoTipo = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("❌ Error al verificar tratamiento activo:", error);
+        console.error(" Error al verificar tratamiento activo:", error);
         res.status(500).json({ mensaje: "Error al verificar el tratamiento activo." });
     }
 };
@@ -226,22 +226,22 @@ exports.crearNuevoTratamientoConCitasYPagos = async (req, res) => {
         const { tratamientoPacienteId, citasTotales, precioPorCita } = req.body;
 
         if (!tratamientoPacienteId || !citasTotales || !precioPorCita) {
-            throw new Error("❌ Datos inválidos: Faltan campos obligatorios.");
+            throw new Error(" Datos inválidos: Faltan campos obligatorios.");
         }
 
-        console.log("📌 Verificando tratamiento, citas y pagos existentes...");
+        console.log(" Verificando tratamiento, citas y pagos existentes...");
 
         // 1️⃣ Obtener el usuario/paciente y estado del tratamiento
         const tratamiento = await tratamientoPacienteModel.obtenerTratamientoPorId(tratamientoPacienteId, connection);
         if (!tratamiento) {
-            throw new Error("❌ Error: No se encontró el tratamiento asociado.");
+            throw new Error(" Error: No se encontró el tratamiento asociado.");
         }
         const { usuario_id, paciente_id, estado } = tratamiento;
-        console.log(`🔍 Usuario asociado: ${usuario_id}, Paciente asociado: ${paciente_id}, Estado: ${estado}`);
+        console.log(` Usuario asociado: ${usuario_id}, Paciente asociado: ${paciente_id}, Estado: ${estado}`);
 
-        // ❌ Si el tratamiento ya está en progreso, no se deben agregar más citas ni pagos
+        //  Si el tratamiento ya está en progreso, no se deben agregar más citas ni pagos
         if (estado !== 'pendiente') {
-            console.log("⚠️ El tratamiento ya está en progreso, no se agregarán más citas ni pagos.");
+            console.log("El tratamiento ya está en progreso, no se agregarán más citas ni pagos.");
             await connection.commit();
             return res.status(200).json({
                 mensaje: "El tratamiento ya está en progreso, no se generaron nuevas citas ni pagos.",
@@ -252,16 +252,16 @@ exports.crearNuevoTratamientoConCitasYPagos = async (req, res) => {
         // 2️⃣ Contar cuántas citas ya existen para este tratamiento
         const citasExistentes = await citaModel.obtenerNuevasCitasPorTratamiento(tratamientoPacienteId, connection);
         const totalCitasExistentes = citasExistentes.length;
-        console.log(`🔍 Citas ya creadas: ${totalCitasExistentes}`);
+        console.log(` Citas ya creadas: ${totalCitasExistentes}`);
 
         // 3️⃣ Obtener pagos existentes para estas citas
         const pagosExistentes = await pagoModel.obtenerPagosPorCitas(citasExistentes.map(cita => cita.id), connection);
-        console.log(`🔍 Pagos ya creados: ${pagosExistentes.length}`);
+        console.log(` Pagos ya creados: ${pagosExistentes.length}`);
 
         // 4️⃣ Calcular cuántas citas y pagos faltan por crear
         const citasFaltantes = citasTotales - totalCitasExistentes;
         const citasSinPago = citasExistentes.filter(cita => !pagosExistentes.some(pago => pago.cita_id === cita.id));
-        console.log(`🔍 Citas sin pago: ${citasSinPago.length}`);
+        console.log(` Citas sin pago: ${citasSinPago.length}`);
 
         // 5️⃣ Actualizar el monto de los pagos existentes al precio ingresado, incluso si no hay citas nuevas
         if (pagosExistentes.length > 0) {
@@ -310,7 +310,7 @@ exports.crearNuevoTratamientoConCitasYPagos = async (req, res) => {
                 console.log(`✔️ ${nuevosPagos.length} nuevos pagos creados correctamente.`);
             }
         } else {
-            console.log("✅ No es necesario crear nuevas citas o pagos, solo se actualizaron los montos existentes.");
+            console.log("No es necesario crear nuevas citas o pagos, solo se actualizaron los montos existentes.");
         }
 
         // 7️⃣ Actualizar citas_totales y estado del tratamiento a "en progreso"
@@ -326,7 +326,7 @@ exports.crearNuevoTratamientoConCitasYPagos = async (req, res) => {
 
     } catch (error) {
         await connection.rollback();
-        console.error('❌ Error al verificar y crear/actualizar citas/pagos:', error.message);
+        console.error(' Error al verificar y crear/actualizar citas/pagos:', error.message);
         res.status(500).json({ mensaje: error.message });
     } finally {
         connection.release();
@@ -372,7 +372,7 @@ exports.obtenerCitasPorTratamiento = async (req, res) => {
             estado_pago: cita.estado_pago,
             monto: cita.monto,
             metodo: cita.metodo,
-            pago_id: cita.pago_id  // ✅ ¡Aquí estaba el detalle!
+            pago_id: cita.pago_id  // ¡Aquí estaba el detalle!
 
 
         }));
@@ -385,5 +385,47 @@ exports.obtenerCitasPorTratamiento = async (req, res) => {
     } catch (error) {
         console.error('Error al obtener citas del tratamiento:', error);
         res.status(500).json({ mensaje: 'Error interno del servidor.' });
+    }
+};
+exports.cancelarTratamientoCompleto = async (req, res) => {
+    const connection = await db.getConnection();
+    await connection.beginTransaction();
+
+    try {
+        const { id } = req.params;
+
+        //  Verificar si el tratamiento existe
+        const [tratamientos] = await connection.query(
+            "SELECT * FROM tratamientos_pacientes WHERE id = ?",
+            [id]
+        );
+
+        if (tratamientos.length === 0) {
+            return res.status(404).json({ mensaje: "No se encontró el tratamiento especificado." });
+        }
+
+        const tratamiento = tratamientos[0];
+
+        if (tratamiento.estado === "cancelado") {
+            return res.status(400).json({ mensaje: "El tratamiento ya está cancelado." });
+        }
+        if (tratamiento.estado === "terminado") {
+            return res.status(400).json({ mensaje: "No se puede cancelar un tratamiento ya terminado." });
+        }
+
+        await tratamientoPacienteModel.cancelarTratamientoCompleto(id, connection);
+
+        await connection.commit();
+
+        res.status(200).json({
+            mensaje: "Tratamiento, citas y pagos cancelados correctamente.",
+            tratamiento_id: id
+        });
+    } catch (error) {
+        await connection.rollback();
+        console.error("Error al cancelar el tratamiento:", error);
+        res.status(500).json({ mensaje: "Error al cancelar el tratamiento." });
+    } finally {
+        connection.release();
     }
 };

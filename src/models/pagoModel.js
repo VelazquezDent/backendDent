@@ -20,7 +20,7 @@ exports.crearPago = async (pago, connection) => {
 
 exports.crearPagos = async (pagos, connection) => {
     if (!pagos || pagos.length === 0) {
-        console.log("⚠️ No hay pagos para insertar.");
+        console.log("No hay pagos para insertar.");
         return;
     }
 
@@ -45,7 +45,7 @@ exports.crearPagos = async (pagos, connection) => {
 
 exports.crearNuevosPagos = async (pagos, connection) => {
     if (!pagos || pagos.length === 0) {
-        console.log("⚠️ No hay pagos para insertar. Se omite la consulta.");
+        console.log("No hay pagos para insertar. Se omite la consulta.");
         return;
     }
 

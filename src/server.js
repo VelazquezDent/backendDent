@@ -46,16 +46,16 @@ const csrfProtection = csrf({
   }
 });
 
-// ✅ Lista de rutas excluidas de CSRF (por ejemplo: llamadas desde Alexa)
+// Lista de rutas excluidas de CSRF (por ejemplo: llamadas desde Alexa)
 const csrfExcludedRoutes = [
   '/api/citas/por-fecha',
   '/api/alexa/proximas-citas',
-  '/api/alexa/login',      // Excluye el login de CSRF // ✅ Esta ruta nueva
+  '/api/alexa/login',      // Excluye el login de CSRF // Esta ruta nueva
   '/api/alexa/login-codigo', // Excluye el login con código de CSRF
   '/api/usuarios/login-movil',          // ⬅️ Login móvil
   '/api/usuarios/movil/verificar-sesion' 
 ];
-// ✅ Middleware para aplicar CSRF condicionalmente
+// Middleware para aplicar CSRF condicionalmente
 app.use((req, res, next) => {
   if (csrfExcludedRoutes.includes(req.path)) {
     return next(); // No aplicar CSRF
@@ -64,7 +64,7 @@ app.use((req, res, next) => {
   }
 });
 
-// ✅ Ruta pública para obtener el token CSRF
+// Ruta pública para obtener el token CSRF
 app.get('/api/get-csrf-token', (req, res) => {
   res.cookie('XSRF-TOKEN', req.csrfToken(), {
     httpOnly: false,
@@ -75,7 +75,7 @@ app.get('/api/get-csrf-token', (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
 });
 
-// ✅ Rutas protegidas (excepto las excluidas)
+// Rutas protegidas (excepto las excluidas)
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/tratamientos', tratamientoRoutes);
 app.use('/api/citas', citaRoutes);

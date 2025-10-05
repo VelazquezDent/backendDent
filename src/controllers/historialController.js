@@ -6,13 +6,13 @@ exports.obtenerHistorialesPorUsuario = async (req, res) => {
         const historiales = await historialModel.obtenerHistorialesPorUsuario(usuarioId);
 
         if (historiales.length === 0) {
-            console.warn(`⚠️ No hay historiales médicos.`);
-            return res.status(200).json([]); // ✅ Devolver 200 con array vacío en vez de 404
+            console.warn(`No hay historiales médicos.`);
+            return res.status(200).json([]); // Devolver 200 con array vacío en vez de 404
         }
 
         res.status(200).json(historiales);
     } catch (error) {
-        console.error('❌ Error al obtener los historiales médicos del usuario:', error);
+        console.error(' Error al obtener los historiales médicos del usuario:', error);
         res.status(500).json({ mensaje: 'Error interno al obtener los historiales médicos del usuario.' });
     }
 };
@@ -22,13 +22,13 @@ exports.obtenerHistorialesPorUsuarioSinCuenta = async (req, res) => {
         const historiales = await historialModel.obtenerHistorialesPorUsuarioSinCuenta(paciente_Sin_PlataformaId);
 
         if (historiales.length === 0) {
-            console.warn(`⚠️ No hay historiales médicos.`);
-            return res.status(200).json([]); // ✅ Devolver 200 con array vacío en vez de 404
+            console.warn(`No hay historiales médicos.`);
+            return res.status(200).json([]); // Devolver 200 con array vacío en vez de 404
         }
 
         res.status(200).json(historiales);
     } catch (error) {
-        console.error('❌ Error al obtener los historiales médicos del usuario:', error);
+        console.error(' Error al obtener los historiales médicos del usuario:', error);
         res.status(500).json({ mensaje: 'Error interno al obtener los historiales médicos del usuario.' });
     }
 };

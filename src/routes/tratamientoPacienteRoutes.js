@@ -19,5 +19,7 @@ router.get('/historial', tratamientoPacienteController.obtenerHistorialTratamien
 router.get('/verificar/:tipo/:id', tratamientoPacienteController.verificarTratamientoActivoTipo);
 router.get('/historial/:usuario_id', tratamientoPacienteController.obtenerHistorialPorUsuario);
 router.get('/citas-por-tratamiento/:tratamiento_paciente_id', tratamientoPacienteController.obtenerCitasPorTratamiento);
+// Nueva ruta para cancelar tratamiento
+router.put('/cancelar/:id', tratamientoPacienteController.cancelarTratamientoCompleto);
 
 module.exports = router;

@@ -5,7 +5,7 @@ exports.obtenerConfiguraciones = async (req, res) => {
     const config = await configuracionesModel.obtener();
     res.status(200).json(config);
   } catch (error) {
-    console.error("❌ Error al obtener configuraciones:", error);
+    console.error(" Error al obtener configuraciones:", error);
     res.status(500).json({ mensaje: "Error al obtener configuración" });
   }
 };
@@ -28,7 +28,7 @@ exports.actualizarConfiguraciones = async (req, res) => {
 
     res.status(200).json({ mensaje: "Configuraciones actualizadas correctamente." });
   } catch (error) {
-    console.error("❌ Error al actualizar configuraciones:", error);
+    console.error(" Error al actualizar configuraciones:", error);
     res.status(500).json({ mensaje: "Error interno" });
   }
 };

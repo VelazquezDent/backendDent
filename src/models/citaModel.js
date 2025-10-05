@@ -16,7 +16,7 @@ exports.crearCita = async (cita, connection) => {
 
 exports.crearCitas = async (citas, connection) => {
     if (!citas || citas.length === 0) {
-        console.warn("⚠️ No hay citas para insertar.");
+        console.warn("No hay citas para insertar.");
         return;
     }
 
@@ -37,9 +37,10 @@ exports.obtenerCitasPorTratamiento = async (tratamientoPacienteId, connection) =
     const query = `SELECT * FROM citas WHERE tratamiento_paciente_id = ?`;
     const [rows] = await connection.query(query, [tratamientoPacienteId]);
 
-    console.log("📌 Citas recuperadas en obtenerCitasPorTratamiento:", rows);
+    console.log(" Citas recuperadas en obtenerCitasPorTratamiento:", rows);
     return rows;
 };
+
 exports.obtenerCitasPorUsuario = async (usuarioId) => {
     const query = `
         SELECT 
@@ -73,6 +74,7 @@ exports.obtenerCitasPorUsuario = async (usuarioId) => {
         estado_cita: cita.estado_cita // Mantener NULL si está en la BD
     }));
 };
+
 exports.obtenerProximasCitas = async () => {
     const query = `
         SELECT 
@@ -110,16 +112,19 @@ exports.obtenerProximasCitas = async () => {
         JOIN tratamientos t ON tp.tratamiento_id = t.id
         LEFT JOIN usuarios u ON tp.usuario_id = u.id
         LEFT JOIN pacientes_sin_plataforma p ON tp.paciente_id = p.id
-        WHERE c.fecha_hora IS NOT NULL 
-          AND c.fecha_hora != '0000-00-00 00:00:00'
+        WHERE 
+            c.fecha_hora IS NOT NULL
+            AND c.fecha_hora != '0000-00-00 00:00:00'
+            AND c.estado NOT IN ('cancelado', 'cancelada')     -- Excluir canceladas
+            AND tp.estado NOT IN ('cancelado', 'terminado')    -- Excluir tratamientos finalizados o cancelados
         ORDER BY c.fecha_hora ASC;
     `;
 
     const [citas] = await db.execute(query);
-
-    // Devolvemos las citas sin modificar la fecha
     return citas;
 };
+
+
 exports.obtenerCitasActivas = async () => {
     const query = `
         SELECT 
@@ -134,6 +139,7 @@ exports.obtenerCitasActivas = async () => {
     const [citas] = await db.execute(query);
     return citas;
 };
+
 exports.obtenerCitasPorTratamiento = async (tratamientoPacienteId) => {
     const query = `
         SELECT * 
@@ -149,9 +155,10 @@ exports.obtenerCitasPorTratamiento = async (tratamientoPacienteId) => {
     const [rows] = await db.execute(query, [tratamientoPacienteId]);
     return rows;
 };
+
 exports.crearNuevasCitas = async (citas, connection) => {
     if (!citas || citas.length === 0) {
-        console.warn("⚠️ No hay citas para insertar.");
+        console.warn("No hay citas para insertar.");
         return;
     }
 
@@ -173,6 +180,7 @@ exports.obtenerNuevasCitasPorTratamiento = async (tratamientoPacienteId, connect
     const [rows] = await connection.query(query, [tratamientoPacienteId]);
     return rows;
 };
+
 exports.actualizarFechaHoraCita = async (id, fechaHora) => {
     const query = `
         UPDATE citas 
@@ -188,7 +196,6 @@ exports.obtenerCitaPorId = async (id) => {
     const [rows] = await db.execute(query, [id]);
     return rows.length > 0 ? rows[0] : null;
 };
-
 // Marcar cita como completada y aumentar citas asistidas
 exports.marcarCitaComoCompletada = async (id, comentario) => {
     const connection = await db.getConnection();
@@ -245,13 +252,12 @@ exports.marcarCitaComoCompletada = async (id, comentario) => {
         return { success: true, mensaje: 'Cita completada y tratamiento actualizado' };
     } catch (error) {
         await connection.rollback();
-        console.error("❌ Error al completar cita:", error);
+        console.error(" Error al completar cita:", error);
         return { success: false, mensaje: 'Error al completar cita', error };
     } finally {
         connection.release();
     }
 };
-
 
 exports.actualizarFechaHoraCita = async (id, fechaHora) => {
     // Primero obtenemos la información actual de la cita
@@ -302,7 +308,7 @@ exports.obtenerCitaPorTratamiento = async (tratamiento_paciente_id) => {
         IFNULL(p.estado, 'pendiente') AS estado_pago,
         IFNULL(p.metodo, NULL) AS metodo,
         IFNULL(p.monto, 0) AS monto,
-        p.id AS pago_id -- ✅ Campo que necesitas para el frontend
+        p.id AS pago_id -- Campo que necesitas para el frontend
     FROM tratamientos_pacientes tp
     INNER JOIN tratamientos t ON tp.tratamiento_id = t.id
     INNER JOIN citas c ON c.tratamiento_paciente_id = tp.id

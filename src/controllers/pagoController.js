@@ -1,7 +1,7 @@
 const pagoModel = require('../models/pagoModel');
 require('dotenv').config();
 const Stripe = require("stripe");
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY); // ✅ desde .env
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY); // desde .env
 
 exports.crearCheckoutStripe = async (req, res) => {
   try {
@@ -122,7 +122,7 @@ exports.actualizarPagosYMarcarCitas = async (req, res) => {
         res.status(200).json({ mensaje: 'Pagos y citas actualizados correctamente.', resultado });
     } catch (error) {
         await connection.rollback();
-        console.error('❌ Error al actualizar pagos y citas:', error);
+        console.error(' Error al actualizar pagos y citas:', error);
         res.status(500).json({ mensaje: 'Error interno del servidor.' });
     } finally {
         connection.release();

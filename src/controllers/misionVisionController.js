@@ -28,7 +28,7 @@ exports.crearNuevaMisionVision = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("❌ Error al crear nueva misión/visión:", error);
+        console.error(" Error al crear nueva misión/visión:", error);
         res.status(500).json({ mensaje: "Error interno al crear nueva versión" });
     }
 };
@@ -43,7 +43,7 @@ exports.obtenerAmbasVigentes = async (req, res) => {
             vision: vision || null
         });
     } catch (error) {
-        console.error("❌ Error al obtener misión y visión vigentes:", error);
+        console.error(" Error al obtener misión y visión vigentes:", error);
         res.status(500).json({ mensaje: "Error interno al obtener información vigente." });
     }
 };
@@ -52,7 +52,7 @@ exports.obtenerHistorial = async (req, res) => {
         const historial = await misionVisionModel.obtenerHistorial();
         res.status(200).json(historial);
     } catch (error) {
-        console.error("❌ Error al obtener historial:", error);
+        console.error(" Error al obtener historial:", error);
         res.status(500).json({ mensaje: "Error al obtener historial de misión/visión" });
     }
 };
@@ -73,7 +73,7 @@ exports.editarVigentePorId = async (req, res) => {
 
         res.status(200).json({ mensaje: "Contenido actualizado correctamente." });
     } catch (error) {
-        console.error("❌ Error al editar contenido vigente:", error);
+        console.error(" Error al editar contenido vigente:", error);
         res.status(500).json({ mensaje: "Error al actualizar la misión o visión." });
     }
 };

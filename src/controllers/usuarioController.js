@@ -483,7 +483,7 @@ const obtenerPacientesParaPrediccion = async (req, res) => {
 
     res.json(pacientesConDia);
   } catch (error) {
-    console.error('❌ Error al obtener pacientes para predicción:', error);
+    console.error(' Error al obtener pacientes para predicción:', error);
     res.status(500).json({ error: 'Error al obtener datos para predicción' });
   }
 };

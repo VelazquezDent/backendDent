@@ -42,7 +42,7 @@ router.post('/proximas-citas', async (req, res) => {
     res.json({ response: mensaje });
 
   } catch (error) {
-    console.error('❌ Error en Alexa:', error);
+    console.error(' Error en Alexa:', error);
     res.status(500).json({ response: 'Ocurrió un error al consultar las citas.' });
   }
 });

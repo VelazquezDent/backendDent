@@ -10,7 +10,7 @@ exports.crear = async (req, res) => {
     const id = await politicaModel.insertar(titulo, descripcion);
     res.status(201).json({ mensaje: "Política registrada", id });
   } catch (error) {
-    console.error("❌ Error al registrar política:", error);
+    console.error(" Error al registrar política:", error);
     res.status(500).json({ mensaje: "Error interno al registrar política" });
   }
 };
@@ -20,7 +20,7 @@ exports.listar = async (req, res) => {
     const politicas = await politicaModel.obtenerTodas();
     res.status(200).json(politicas);
   } catch (error) {
-    console.error("❌ Error al obtener políticas:", error);
+    console.error(" Error al obtener políticas:", error);
     res.status(500).json({ mensaje: "Error al obtener políticas" });
   }
 };
@@ -54,7 +54,7 @@ exports.editar = async (req, res) => {
 
     res.status(200).json({ mensaje: "Política actualizada correctamente." });
   } catch (error) {
-    console.error("❌ Error al editar política:", error);
+    console.error(" Error al editar política:", error);
     res.status(500).json({ mensaje: "Error al editar política" });
   }
 };

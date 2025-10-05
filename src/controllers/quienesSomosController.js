@@ -10,7 +10,7 @@ exports.crear = async (req, res) => {
     const id = await quienesSomosModel.insertar(contenido);
     res.status(201).json({ mensaje: "Contenido registrado como vigente", id });
   } catch (error) {
-    console.error("❌ Error al registrar quienes somos:", error);
+    console.error(" Error al registrar quienes somos:", error);
     res.status(500).json({ mensaje: "Error interno al registrar contenido" });
   }
 };
@@ -20,7 +20,7 @@ exports.listar = async (req, res) => {
     const datos = await quienesSomosModel.obtenerTodo();
     res.status(200).json(datos);
   } catch (error) {
-    console.error("❌ Error al obtener quienes somos:", error);
+    console.error(" Error al obtener quienes somos:", error);
     res.status(500).json({ mensaje: "Error al obtener contenido" });
   }
 };
@@ -30,7 +30,7 @@ exports.obtenerVigente = async (req, res) => {
     const actual = await quienesSomosModel.obtenerVigente();
     res.status(200).json(actual);
   } catch (error) {
-    console.error("❌ Error al obtener vigente:", error);
+    console.error(" Error al obtener vigente:", error);
     res.status(500).json({ mensaje: "Error al obtener contenido vigente" });
   }
 };
@@ -51,7 +51,7 @@ exports.editar = async (req, res) => {
 
     res.status(200).json({ mensaje: "Contenido actualizado correctamente." });
   } catch (error) {
-    console.error("❌ Error al editar quienes somos:", error);
+    console.error(" Error al editar quienes somos:", error);
     res.status(500).json({ mensaje: "Error interno al editar contenido" });
   }
 };
@@ -65,7 +65,7 @@ exports.activar = async (req, res) => {
     }
     res.status(200).json({ mensaje: "Contenido activado como vigente." });
   } catch (error) {
-    console.error("❌ Error al activar vigente:", error);
+    console.error(" Error al activar vigente:", error);
     res.status(500).json({ mensaje: "Error al activar contenido como vigente" });
   }
 };

@@ -81,7 +81,7 @@ exports.actualizarFechaHoraCita = async (req, res) => {
 
         res.status(200).json({ mensaje: "Fecha y hora de la cita actualizadas correctamente." });
     } catch (error) {
-        console.error("❌ Error al actualizar la cita:", error);
+        console.error(" Error al actualizar la cita:", error);
         res.status(500).json({ mensaje: "Error interno al actualizar la cita." });
     }
 };
@@ -109,7 +109,7 @@ exports.completarCita = async (req, res) => {
 
         res.status(200).json({ mensaje: "Cita marcada como completada correctamente." });
     } catch (error) {
-        console.error("❌ Error al marcar la cita como completada:", error);
+        console.error(" Error al marcar la cita como completada:", error);
         res.status(500).json({ mensaje: "Error interno al marcar la cita como completada." });
     }
 };
@@ -134,7 +134,7 @@ exports.actualizarFechaHoraCita = async (req, res) => {
         console.log("✔️ Fecha y hora de la cita actualizadas correctamente.");
         res.status(200).json({ mensaje: "Fecha y hora de la cita actualizadas correctamente." });
     } catch (error) {
-        console.error("❌ Error al actualizar la fecha y hora de la cita:", error);
+        console.error(" Error al actualizar la fecha y hora de la cita:", error);
         res.status(500).json({ mensaje: "Error interno al actualizar la cita." });
     }
 };
@@ -168,7 +168,7 @@ exports.obtenerNotificacionesCitas = async (req, res) => {
 
         res.status(200).json({ notificaciones });
     } catch (error) {
-        console.error("❌ Error al obtener notificaciones de citas:", error);
+        console.error(" Error al obtener notificaciones de citas:", error);
         res.status(500).json({ mensaje: "Error interno al obtener notificaciones de citas." });
     }
 };
@@ -184,7 +184,7 @@ exports.obtenerCitasPorFecha = async (req, res) => {
         const citas = await citaModel.obtenerCitasPorFecha(fecha);
         res.status(200).json({ citas });
     } catch (error) {
-        console.error("❌ Error al obtener citas por fecha:", error);
+        console.error(" Error al obtener citas por fecha:", error);
         res.status(500).json({ mensaje: "Error al obtener las citas por fecha" });
     }
 };
