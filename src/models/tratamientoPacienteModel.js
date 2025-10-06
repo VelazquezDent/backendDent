@@ -142,63 +142,27 @@ exports.actualizarCitasTotalesYEstado = async (tratamientoPacienteId, citasTotal
     console.log(`✔️ Tratamiento ${tratamientoPacienteId} actualizado: citas_totales = ${citasTotales}, estado = ${estado}`);
 };
 
-exports.obtenerHistorialTratamientos = async () => {
+exports.obtenerHistorialPorUsuario = async (usuario_id) => {
     const query = `
         SELECT 
             tp.id AS tratamiento_id,
-            COALESCE(u.id, p.id) AS paciente_id,
-            COALESCE(u.nombre, p.nombre) AS nombre,
-            COALESCE(u.apellido_paterno, p.apellido_paterno) AS apellido_paterno,
-            COALESCE(u.apellido_materno, p.apellido_materno) AS apellido_materno,
-            COALESCE(u.telefono, p.telefono) AS telefono,
-            COALESCE(u.email, p.email) AS email,
-            TIMESTAMPDIFF(YEAR, COALESCE(u.fecha_nacimiento, p.fecha_nacimiento), CURDATE()) AS edad,
-            COALESCE(u.sexo, p.sexo) AS sexo,
-            t.nombre AS tratamiento_nombre,
-            tp.citas_totales, 
-            tp.citas_asistidas, 
-            tp.estado, 
-            DATE_FORMAT(tp.fecha_inicio, '%Y-%m-%d') AS fecha_inicio, 
-            DATE_FORMAT(tp.fecha_finalizacion, '%Y-%m-%d') AS fecha_finalizacion,
-
-            CAST(
-                JSON_ARRAYAGG(
-                    JSON_OBJECT(
-                        'cita_id', c.id,
-                        'fecha_cita', c.fecha_hora,
-                        'estado_cita', c.estado,
-                        'cita_pagada', c.pagada,
-                        'cita_comentario', c.comentario
-                    )
-                ) AS CHAR
-            ) AS citas,
-
-            CAST(
-                JSON_ARRAYAGG(
-                    JSON_OBJECT(
-                        'pago_id', pgo.id,
-                        'monto_pago', pgo.monto,
-                        'metodo_pago', pgo.metodo,
-                        'estado_pago', pgo.estado,
-                        'fecha_pago', DATE_FORMAT(pgo.fecha_pago, '%Y-%m-%d')
-                    )
-                ) AS CHAR
-            ) AS pagos
-
-        FROM tratamientos_pacientes tp
-        LEFT JOIN usuarios u ON tp.usuario_id = u.id
-        LEFT JOIN pacientes_sin_plataforma p ON tp.paciente_id = p.id
-        JOIN tratamientos t ON tp.tratamiento_id = t.id
+            u.id AS paciente_id,
+            u.nombre,
+            u.apellido_paterno,
+            u.apellido_materno,
+            u.telefono,
+            u.email,
+            TIMESTAMPDIFF(YEAR, u.fecha_nacimiento, CURDATE()) AS edad,
+            u.sexo,
+             JOIN usuarios u ON tp.usuario_id = u.idJOIN tratamientos t ON tp.tratamiento_id = t.id
         LEFT JOIN citas c ON c.tratamiento_paciente_id = tp.id
         LEFT JOIN pagos pgo ON pgo.cita_id = c.id
-        WHERE tp.estado = 'terminado'
-        GROUP BY tp.id, u.id, p.id, t.id
-        ORDER BY tp.fecha_finalizacion DESC;
+        WHERE tp.estado = 'terminado' AND tp.usuario_id = ?
+        GROUP BY tp.id, u.id, t.id
+         ORDER BY tp.fecha_finalizacion DESC;
     `;
 
-    const [rows] = await db.query(query);
-
-    // Convertir las cadenas JSON en arreglos reales
+    const [rows] = await db.query(query, [usuario_id]);
     const result = rows.map(row => ({
         ...row,
         citas: JSON.parse(row.citas || '[]'),
