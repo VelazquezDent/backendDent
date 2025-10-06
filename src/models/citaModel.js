@@ -341,5 +341,30 @@ exports.obtenerCitasPorFecha = async (fecha) => {
     const [rows] = await db.execute(query, [fecha]);
     return rows;
 };
+exports.obtenerHistorialCitasPorUsuario = async (usuarioId) => {
+  const query = `
+    SELECT 
+        c.id AS cita_id,
+        DATE_FORMAT(c.fecha_hora, '%Y-%m-%d %H:%i:%s') AS fecha_hora,
+        c.estado AS estado_cita,
+        CASE 
+            WHEN c.pagada = 1 THEN 'Pagado'
+            ELSE 'No pagado'
+        END AS estado_pago,
+        t.nombre AS tratamiento,
+        tp.estado AS estado_tratamiento
+    FROM citas c
+    JOIN tratamientos_pacientes tp ON c.tratamiento_paciente_id = tp.id
+    JOIN tratamientos t ON tp.tratamiento_id = t.id
+    WHERE 
+        tp.usuario_id = ?
+        AND c.estado IN ('cancelado', 'completada')  -- 🔹 Solo citas canceladas o completadas
+        AND c.fecha_hora IS NOT NULL                 -- 🔹 Excluir citas sin fecha programada
+    ORDER BY c.fecha_hora DESC;
+  `;
+
+  const [rows] = await db.execute(query, [usuarioId]);
+  return rows;
+};
 
 

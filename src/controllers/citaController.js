@@ -188,3 +188,14 @@ exports.obtenerCitasPorFecha = async (req, res) => {
         res.status(500).json({ mensaje: "Error al obtener las citas por fecha" });
     }
 };
+exports.obtenerHistorialCitasPorUsuario = async (req, res) => {
+  try {
+    const { usuarioId } = req.params;
+    const citas = await citaModel.obtenerHistorialCitasPorUsuario(usuarioId);
+    res.status(200).json(citas);
+  } catch (error) {
+    console.error("❌ Error al obtener historial de citas:", error);
+    res.status(500).json({ mensaje: "Error al obtener historial de citas del usuario" });
+  }
+};
+

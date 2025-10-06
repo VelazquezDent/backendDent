@@ -17,6 +17,7 @@ router.put('/completar/:id', citaController.completarCita);
 router.put('/actualizar-fecha-hora/:id', citaController.actualizarFechaHoraCita);
 router.get('/notificaciones', citaController.obtenerNotificacionesCitas);
 router.post('/por-fecha', citaController.obtenerCitasPorFecha);
+router.get('/historial/:usuarioId', citaController.obtenerHistorialCitasPorUsuario);
 
 
 module.exports = router;
