@@ -276,7 +276,7 @@ exports.obtenerHistorialTratamientos = async () => {
 };
 
 exports.cancelarTratamientoCompleto = async (tratamientoPacienteId, connection) => {
-    //  1. Cancelar el tratamiento
+    // 1️ Cancelar el tratamiento
     await connection.query(
         `
         UPDATE tratamientos_pacientes
@@ -287,27 +287,27 @@ exports.cancelarTratamientoCompleto = async (tratamientoPacienteId, connection) 
         [tratamientoPacienteId]
     );
 
-    //  2. Obtener todas las citas relacionadas
-    const [citas] = await connection.query(
-        `SELECT id FROM citas WHERE tratamiento_paciente_id = ?`,
+    // 2️ Obtener solo las citas PENDIENTES del tratamiento
+    const [citasPendientes] = await connection.query(
+        `SELECT id FROM citas WHERE tratamiento_paciente_id = ? AND estado = 'pendiente'`,
         [tratamientoPacienteId]
     );
 
-    if (citas.length > 0) {
-        const citaIds = citas.map(c => c.id);
+    if (citasPendientes.length > 0) {
+        const citaIds = citasPendientes.map(c => c.id);
 
-        //  3. Cancelar todas las citas del tratamiento
+        // 3️ Cancelar únicamente las citas pendientes
         await connection.query(
             `
             UPDATE citas
             SET estado = 'cancelado',
                 comentario = 'Cita cancelada debido a la cancelación del tratamiento'
-            WHERE tratamiento_paciente_id = ?
+            WHERE id IN (?)
             `,
-            [tratamientoPacienteId]
+            [citaIds]
         );
 
-        //  4. Cancelar todos los pagos relacionados con esas citas
+        // 4️ Cancelar únicamente los pagos de las citas pendientes
         await connection.query(
             `
             UPDATE pagos
@@ -317,7 +317,12 @@ exports.cancelarTratamientoCompleto = async (tratamientoPacienteId, connection) 
             `,
             [citaIds]
         );
+
+        console.log(` ${citaIds.length} citas y pagos pendientes fueron cancelados.`);
+    } else {
+        console.log(" No hay citas pendientes para cancelar.");
     }
 
-    console.log(`Tratamiento ${tratamientoPacienteId} cancelado con todas sus citas y pagos.`);
+    console.log(` Tratamiento ${tratamientoPacienteId} marcado como cancelado.`);
 };
+
