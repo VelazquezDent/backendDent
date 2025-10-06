@@ -154,15 +154,51 @@ exports.obtenerHistorialPorUsuario = async (usuario_id) => {
             u.email,
             TIMESTAMPDIFF(YEAR, u.fecha_nacimiento, CURDATE()) AS edad,
             u.sexo,
-             JOIN usuarios u ON tp.usuario_id = u.idJOIN tratamientos t ON tp.tratamiento_id = t.id
+            t.nombre AS tratamiento_nombre,
+            tp.citas_totales, 
+            tp.citas_asistidas, 
+            tp.estado, 
+            DATE_FORMAT(tp.fecha_inicio, '%Y-%m-%d') AS fecha_inicio, 
+            DATE_FORMAT(tp.fecha_finalizacion, '%Y-%m-%d') AS fecha_finalizacion,
+
+            CAST(
+                JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'cita_id', c.id,
+                        'fecha_cita', c.fecha_hora,
+                        'estado_cita', c.estado,
+                        'cita_pagada', c.pagada,
+                        'cita_comentario', c.comentario
+                    )
+                ) AS CHAR
+            ) AS citas,
+
+            CAST(
+                JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'pago_id', pgo.id,
+                        'monto_pago', pgo.monto,
+                        'metodo_pago', pgo.metodo,
+                        'estado_pago', pgo.estado,
+                        'fecha_pago', DATE_FORMAT(pgo.fecha_pago, '%Y-%m-%d')
+                    )
+                ) AS CHAR
+            ) AS pagos
+
+        FROM tratamientos_pacientes tp
+        JOIN usuarios u ON tp.usuario_id = u.id
+        JOIN tratamientos t ON tp.tratamiento_id = t.id
         LEFT JOIN citas c ON c.tratamiento_paciente_id = tp.id
         LEFT JOIN pagos pgo ON pgo.cita_id = c.id
-        WHERE tp.estado = 'terminado' AND tp.usuario_id = ?
+        WHERE tp.estado IN ('terminado', 'cancelado')
+        AND tp.usuario_id = ?
         GROUP BY tp.id, u.id, t.id
-         ORDER BY tp.fecha_finalizacion DESC;
+        ORDER BY tp.fecha_finalizacion DESC;
     `;
 
     const [rows] = await db.query(query, [usuario_id]);
+
+    // Convertir los JSON a arreglos reales
     const result = rows.map(row => ({
         ...row,
         citas: JSON.parse(row.citas || '[]'),
@@ -171,6 +207,7 @@ exports.obtenerHistorialPorUsuario = async (usuario_id) => {
 
     return result;
 };
+
 
 exports.obtenerHistorialTratamientos = async () => {
     const query = `
