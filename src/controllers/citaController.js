@@ -1,4 +1,5 @@
 const moment = require('moment-timezone');
+const { sumarPuntos } = require('../services/puntos'); // ← importa el helper
 const citaModel = require('../models/citaModel');
 
 exports.crearCitas = async (req, res) => {
@@ -88,28 +89,50 @@ exports.actualizarFechaHoraCita = async (req, res) => {
 exports.completarCita = async (req, res) => {
     try {
         const { id } = req.params; // ID de la cita
-        const { comentario } = req.body; // Comentario opcional
+        const { comentario } = req.body;
 
-        console.log("📩 Comentario recibido:", comentario); // 🔹 LOG para verificar
-
-        // Validar si la cita existe antes de actualizar
+        // 1️⃣ Verificar si la cita existe
         const citaExistente = await citaModel.obtenerCitaPorId(id);
         if (!citaExistente) {
             return res.status(404).json({ mensaje: "La cita no existe." });
         }
 
-        // Actualizar la cita en la base de datos
+        // 2️⃣ Marcar la cita como completada (usa tu modelo)
         const resultado = await citaModel.marcarCitaComoCompletada(id, comentario);
 
-        if (resultado.affectedRows === 0) {
-            return res.status(404).json({ mensaje: "No se pudo actualizar la cita." });
+        if (!resultado.success) {
+            return res.status(500).json({ mensaje: "No se pudo actualizar la cita." });
         }
 
-        console.log("✔️ Cita actualizada con comentario:", comentario); // 🔹 LOG de éxito
+        const { usuarioId, termino } = resultado;
 
-        res.status(200).json({ mensaje: "Cita marcada como completada correctamente." });
+        // 3️⃣ Otorgar puntos (con try/catch interno para que no rompa el flujo)
+        try {
+            if (usuarioId) {
+                // 🎯 +10 puntos por asistencia puntual (cita completada)
+                await sumarPuntos(usuarioId, 10, 'CITA_PUNTUAL', 'cita', id);
+
+                // 🎯 +50 puntos si con esta cita se terminó el tratamiento
+                if (termino) {
+                    await sumarPuntos(
+                        usuarioId,
+                        50,
+                        'TRATAMIENTO_COMPLETADO',
+                        'tratamiento_paciente',
+                        citaExistente.tratamiento_paciente_id
+                    );
+                }
+            }
+        } catch (e) {
+            console.error('❗ Error otorgando puntos:', e?.sqlMessage || e?.message || e);
+        }
+
+        // 4️⃣ Respuesta final
+        return res.status(200).json({
+            mensaje: "Cita marcada como completada y puntos otorgados correctamente.",
+        });
     } catch (error) {
-        console.error(" Error al marcar la cita como completada:", error);
+        console.error("❌ Error al marcar la cita como completada:", error?.sqlMessage || error?.message || error);
         res.status(500).json({ mensaje: "Error interno al marcar la cita como completada." });
     }
 };
@@ -189,13 +212,13 @@ exports.obtenerCitasPorFecha = async (req, res) => {
     }
 };
 exports.obtenerHistorialCitasPorUsuario = async (req, res) => {
-  try {
-    const { usuarioId } = req.params;
-    const citas = await citaModel.obtenerHistorialCitasPorUsuario(usuarioId);
-    res.status(200).json(citas);
-  } catch (error) {
-    console.error("❌ Error al obtener historial de citas:", error);
-    res.status(500).json({ mensaje: "Error al obtener historial de citas del usuario" });
-  }
+    try {
+        const { usuarioId } = req.params;
+        const citas = await citaModel.obtenerHistorialCitasPorUsuario(usuarioId);
+        res.status(200).json(citas);
+    } catch (error) {
+        console.error("❌ Error al obtener historial de citas:", error);
+        res.status(500).json({ mensaje: "Error al obtener historial de citas del usuario" });
+    }
 };
 

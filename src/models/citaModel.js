@@ -2,7 +2,7 @@ const db = require('../db');
 
 exports.crearCita = async (cita, connection) => {
     const query = `INSERT INTO citas (tratamiento_paciente_id, fecha_hora, estado, pagada) VALUES (?, ?, ?, ?)`;
-    
+
     const values = [
         cita.tratamientoPacienteId,
         cita.fechaHora,
@@ -21,7 +21,7 @@ exports.crearCitas = async (citas, connection) => {
     }
 
     const query = `INSERT INTO citas (tratamiento_paciente_id, fecha_hora, estado, pagada) VALUES ?`;
-    
+
     const values = citas.map(cita => [
         cita.tratamientoPacienteId,
         cita.fechaHora,
@@ -163,7 +163,7 @@ exports.crearNuevasCitas = async (citas, connection) => {
     }
 
     const query = `INSERT INTO citas (tratamiento_paciente_id, fecha_hora, estado, pagada) VALUES ?`;
-    
+
     const values = citas.map(cita => [
         cita.tratamientoPacienteId,
         cita.fechaHora,
@@ -197,59 +197,70 @@ exports.obtenerCitaPorId = async (id) => {
     return rows.length > 0 ? rows[0] : null;
 };
 // Marcar cita como completada y aumentar citas asistidas
+// Marcar cita como completada y aumentar citas asistidas
 exports.marcarCitaComoCompletada = async (id, comentario) => {
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
 
-        // 1. Marcar cita como completada
-        const updateCitaQuery = `
-            UPDATE citas 
-            SET estado = 'completada', comentario = ?
-            WHERE id = ?;
-        `;
-        await connection.execute(updateCitaQuery, [comentario, id]);
+        // 1) Marcar cita como completada
+        await connection.execute(
+            `UPDATE citas SET estado = 'completada', comentario = ? WHERE id = ?;`,
+            [comentario, id]
+        );
 
-        // 2. Obtener el tratamiento_paciente_id desde la cita
-        const getCitaQuery = `SELECT tratamiento_paciente_id FROM citas WHERE id = ?`;
-        const [citaResult] = await connection.execute(getCitaQuery, [id]);
+        // 2) Obtener el tratamiento_paciente_id y usuario_id
+        const [citaResult] = await connection.execute(
+            `SELECT c.tratamiento_paciente_id, tp.usuario_id
+       FROM citas c
+       JOIN tratamientos_pacientes tp ON tp.id = c.tratamiento_paciente_id
+       WHERE c.id = ?`,
+            [id]
+        );
         if (!citaResult.length) throw new Error("Cita no encontrada");
 
         const tratamientoPacienteId = citaResult[0].tratamiento_paciente_id;
+        const usuarioId = citaResult[0].usuario_id;
 
-        // 3. Obtener datos actuales del tratamiento
-        const getTratamientoQuery = `
-            SELECT citas_asistidas, citas_totales 
-            FROM tratamientos_pacientes 
-            WHERE id = ?;
-        `;
-        const [tratamientoResult] = await connection.execute(getTratamientoQuery, [tratamientoPacienteId]);
+        // 3) Obtener datos actuales del tratamiento
+        const [tratamientoResult] = await connection.execute(
+            `SELECT citas_asistidas, citas_totales, estado
+       FROM tratamientos_pacientes WHERE id = ?;`,
+            [tratamientoPacienteId]
+        );
         if (!tratamientoResult.length) throw new Error("Tratamiento del paciente no encontrado");
 
         const { citas_asistidas, citas_totales } = tratamientoResult[0];
 
-        // 4. Aumentar citas asistidas si aún no se alcanza el total
+        // 4) Aumentar citas asistidas si aún no se alcanza el total
+        let termino = false;
         if (citas_asistidas < citas_totales) {
-            await connection.execute(`
-                UPDATE tratamientos_pacientes 
-                SET citas_asistidas = citas_asistidas + 1 
-                WHERE id = ?;
-            `, [tratamientoPacienteId]);
+            await connection.execute(
+                `UPDATE tratamientos_pacientes SET citas_asistidas = citas_asistidas + 1 WHERE id = ?;`,
+                [tratamientoPacienteId]
+            );
         }
 
-        // 5. Verificar si ya están completas todas las citas
         const nuevasAsistidas = citas_asistidas + 1;
+        // 5) Marcar terminado si ya alcanzó el total
         if (nuevasAsistidas >= citas_totales) {
-            await connection.execute(`
-                UPDATE tratamientos_pacientes 
-                SET estado = 'terminado',
-                    fecha_finalizacion = CURRENT_DATE()
-                WHERE id = ?;
-            `, [tratamientoPacienteId]);
+            await connection.execute(
+                `UPDATE tratamientos_pacientes
+         SET estado = 'terminado', fecha_finalizacion = CURRENT_DATE()
+         WHERE id = ?;`,
+                [tratamientoPacienteId]
+            );
+            termino = true;
         }
 
         await connection.commit();
-        return { success: true, mensaje: 'Cita completada y tratamiento actualizado' };
+        return {
+            success: true,
+            mensaje: 'Cita completada y tratamiento actualizado',
+            usuarioId,                  // ← para puntos
+            tratamientoPacienteId,      // ← opcional, por referencia
+            termino                     // ← true si terminó el tratamiento
+        };
     } catch (error) {
         await connection.rollback();
         console.error(" Error al completar cita:", error);
@@ -258,6 +269,7 @@ exports.marcarCitaComoCompletada = async (id, comentario) => {
         connection.release();
     }
 };
+
 
 exports.actualizarFechaHoraCita = async (id, fechaHora) => {
     // Primero obtenemos la información actual de la cita
@@ -298,7 +310,7 @@ exports.obtenerNotificacionesCitas = async () => {
 };
 
 exports.obtenerCitaPorTratamiento = async (tratamiento_paciente_id) => {
-  const [result] = await db.query(`
+    const [result] = await db.query(`
     SELECT 
         t.nombre AS nombre_tratamiento,
         c.id AS cita_id,
@@ -317,7 +329,7 @@ exports.obtenerCitaPorTratamiento = async (tratamiento_paciente_id) => {
     ORDER BY c.fecha_hora
   `, [tratamiento_paciente_id]);
 
-  return result;
+    return result;
 };
 
 exports.obtenerCitasPorFecha = async (fecha) => {
@@ -342,7 +354,7 @@ exports.obtenerCitasPorFecha = async (fecha) => {
     return rows;
 };
 exports.obtenerHistorialCitasPorUsuario = async (usuarioId) => {
-  const query = `
+    const query = `
     SELECT 
         c.id AS cita_id,
         DATE_FORMAT(c.fecha_hora, '%Y-%m-%d %H:%i:%s') AS fecha_hora,
@@ -363,8 +375,8 @@ exports.obtenerHistorialCitasPorUsuario = async (usuarioId) => {
     ORDER BY c.fecha_hora DESC;
   `;
 
-  const [rows] = await db.execute(query, [usuarioId]);
-  return rows;
+    const [rows] = await db.execute(query, [usuarioId]);
+    return rows;
 };
 
 
