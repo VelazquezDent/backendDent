@@ -18,6 +18,8 @@ const quienesSomosRoutes = require('./routes/quienesSomosRoutes');
 const valoresRoutes = require('./routes/valoresRoutes'); // Importar las rutas de valores
 const ConfiguracionesRoutes = require('./routes/configuracionesRoutes'); // Importar las rutas de configuraciones
 const reportesRoutes = require('./routes/reportesRoutes');
+const puntosRoutes = require('./routes/puntosRoutes');
+
 
 const app = express();
 const port = 4000;
@@ -29,7 +31,7 @@ app.use(cookieParser());
 // Configuración de CORS
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'https://consultoriovelazquezmcd.com', 'https://developer.amazon.com','https://predicciondentista.onrender.com'], // Permite peticiones desde estas URLs
+    origin: ['http://localhost:5173', 'https://consultoriovelazquezmcd.com', 'https://developer.amazon.com', 'https://predicciondentista.onrender.com'], // Permite peticiones desde estas URLs
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'X-XSRF-TOKEN'],
@@ -53,7 +55,7 @@ const csrfExcludedRoutes = [
   '/api/alexa/login',      // Excluye el login de CSRF // Esta ruta nueva
   '/api/alexa/login-codigo', // Excluye el login con código de CSRF
   '/api/usuarios/login-movil',          // ⬅️ Login móvil
-  '/api/usuarios/movil/verificar-sesion' 
+  '/api/usuarios/movil/verificar-sesion'
 ];
 // Middleware para aplicar CSRF condicionalmente
 app.use((req, res, next) => {
@@ -91,6 +93,7 @@ app.use('/api/alexa', alexaRoutes);
 app.use('/api/valores', valoresRoutes); // Usar las rutas de valores
 app.use('/api/configuraciones', ConfiguracionesRoutes); // Usar las rutas de configuraciones
 app.use('/api/reportes', reportesRoutes);
+app.use('/api/puntos', puntosRoutes); // Usar las rutas de puntos
 
 
 // 🔐 Manejo de errores CSRF

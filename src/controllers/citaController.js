@@ -124,7 +124,7 @@ exports.completarCita = async (req, res) => {
                 }
             }
         } catch (e) {
-            console.error('❗ Error otorgando puntos:', e?.sqlMessage || e?.message || e);
+            console.error(' Error otorgando puntos:', e?.sqlMessage || e?.message || e);
         }
 
         // 4️⃣ Respuesta final
