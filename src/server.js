@@ -19,6 +19,7 @@ const valoresRoutes = require('./routes/valoresRoutes'); // Importar las rutas d
 const ConfiguracionesRoutes = require('./routes/configuracionesRoutes'); // Importar las rutas de configuraciones
 const reportesRoutes = require('./routes/reportesRoutes');
 const puntosRoutes = require('./routes/puntosRoutes');
+const logrosRoutes = require('./routes/logrosRoutes');
 
 
 const app = express();
@@ -94,6 +95,8 @@ app.use('/api/valores', valoresRoutes); // Usar las rutas de valores
 app.use('/api/configuraciones', ConfiguracionesRoutes); // Usar las rutas de configuraciones
 app.use('/api/reportes', reportesRoutes);
 app.use('/api/puntos', puntosRoutes); // Usar las rutas de puntos
+app.use('/api/logros', logrosRoutes);
+
 
 
 // 🔐 Manejo de errores CSRF
