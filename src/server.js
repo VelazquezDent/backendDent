@@ -20,6 +20,8 @@ const ConfiguracionesRoutes = require('./routes/configuracionesRoutes'); // Impo
 const reportesRoutes = require('./routes/reportesRoutes');
 const puntosRoutes = require('./routes/puntosRoutes');
 const logrosRoutes = require('./routes/logrosRoutes');
+const recompensasRoutes = require('./routes/recompensasRoutes');
+const gamificación = require('./routes/reportesGamificacion');
 
 
 const app = express();
@@ -96,6 +98,8 @@ app.use('/api/configuraciones', ConfiguracionesRoutes); // Usar las rutas de con
 app.use('/api/reportes', reportesRoutes);
 app.use('/api/puntos', puntosRoutes); // Usar las rutas de puntos
 app.use('/api/logros', logrosRoutes);
+app.use('/api/recompensas', recompensasRoutes);
+app.use('/api/gamificacion', gamificación); // Rutas de gamificación
 
 
 
