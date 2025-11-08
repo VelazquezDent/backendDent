@@ -35,6 +35,18 @@ exports.obtenerCitasPorUsuario = async (req, res) => {
         res.status(500).json({ mensaje: 'Error al obtener citas del usuario' });
     }
 };
+// 👇 NUEVO CONTROLADOR
+exports.obtenerCitasPorUsuarioConTratamiento = async (req, res) => {
+    try {
+        const { usuarioId } = req.params;
+        const citas = await citaModel.obtenerCitasPorUsuarioConTratamiento(usuarioId);
+        res.status(200).json(citas);
+    } catch (error) {
+        console.error('Error al obtener citas del usuario con tratamiento:', error);
+        res.status(500).json({ mensaje: 'Error al obtener citas del usuario con tratamiento' });
+    }
+};
+
 exports.obtenerProximasCitas = async (req, res) => {
     try {
         const citas = await citaModel.obtenerProximasCitas();
@@ -189,13 +201,13 @@ exports.obtenerCitasPorFecha = async (req, res) => {
     }
 };
 exports.obtenerHistorialCitasPorUsuario = async (req, res) => {
-  try {
-    const { usuarioId } = req.params;
-    const citas = await citaModel.obtenerHistorialCitasPorUsuario(usuarioId);
-    res.status(200).json(citas);
-  } catch (error) {
-    console.error("❌ Error al obtener historial de citas:", error);
-    res.status(500).json({ mensaje: "Error al obtener historial de citas del usuario" });
-  }
+    try {
+        const { usuarioId } = req.params;
+        const citas = await citaModel.obtenerHistorialCitasPorUsuario(usuarioId);
+        res.status(200).json(citas);
+    } catch (error) {
+        console.error("❌ Error al obtener historial de citas:", error);
+        res.status(500).json({ mensaje: "Error al obtener historial de citas del usuario" });
+    }
 };
 

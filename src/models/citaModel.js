@@ -2,7 +2,7 @@ const db = require('../db');
 
 exports.crearCita = async (cita, connection) => {
     const query = `INSERT INTO citas (tratamiento_paciente_id, fecha_hora, estado, pagada) VALUES (?, ?, ?, ?)`;
-    
+
     const values = [
         cita.tratamientoPacienteId,
         cita.fechaHora,
@@ -21,7 +21,7 @@ exports.crearCitas = async (citas, connection) => {
     }
 
     const query = `INSERT INTO citas (tratamiento_paciente_id, fecha_hora, estado, pagada) VALUES ?`;
-    
+
     const values = citas.map(cita => [
         cita.tratamientoPacienteId,
         cita.fechaHora,
@@ -72,6 +72,42 @@ exports.obtenerCitasPorUsuario = async (usuarioId) => {
         ...cita,
         fecha_hora: cita.fecha_hora || null, // Ya viene como cadena del DATE_FORMAT
         estado_cita: cita.estado_cita // Mantener NULL si está en la BD
+    }));
+};
+// 👇 NUEVA FUNCIÓN: obtenerCitasPorUsuarioConTratamiento
+exports.obtenerCitasPorUsuarioConTratamiento = async (usuarioId) => {
+    const query = `
+    SELECT 
+        c.id AS cita_id,
+        CASE 
+            WHEN c.fecha_hora IS NULL OR c.fecha_hora = '0000-00-00 00:00:00' THEN NULL
+            ELSE DATE_FORMAT(c.fecha_hora, '%Y-%m-%d %H:%i:%s')
+        END AS fecha_hora,
+
+        c.estado AS estado_cita,
+
+        CASE 
+            WHEN c.pagada = 1 THEN 'Pagado'
+            ELSE 'No pagado'
+        END AS estado_pago,
+
+        t.nombre AS tratamiento,
+        tp.estado AS estado_tratamiento
+    FROM citas c
+    JOIN tratamientos_pacientes tp ON c.tratamiento_paciente_id = tp.id
+    JOIN tratamientos t ON tp.tratamiento_id = t.id
+    WHERE tp.usuario_id = ?
+      AND tp.estado IN ('en progreso', 'pendiente')  -- tratamientos activos
+    ORDER BY c.fecha_hora ASC;
+  `;
+
+    const [citas] = await db.execute(query, [usuarioId]);
+
+    return citas.map((cita) => ({
+        ...cita,
+        fecha_hora: cita.fecha_hora || null,
+        estado_cita: cita.estado_cita,        // puede ser NULL
+        tratamiento: cita.tratamiento?.trim() // por si viene con espacios
     }));
 };
 
@@ -163,7 +199,7 @@ exports.crearNuevasCitas = async (citas, connection) => {
     }
 
     const query = `INSERT INTO citas (tratamiento_paciente_id, fecha_hora, estado, pagada) VALUES ?`;
-    
+
     const values = citas.map(cita => [
         cita.tratamientoPacienteId,
         cita.fechaHora,
@@ -298,7 +334,7 @@ exports.obtenerNotificacionesCitas = async () => {
 };
 
 exports.obtenerCitaPorTratamiento = async (tratamiento_paciente_id) => {
-  const [result] = await db.query(`
+    const [result] = await db.query(`
     SELECT 
         t.nombre AS nombre_tratamiento,
         c.id AS cita_id,
@@ -317,7 +353,7 @@ exports.obtenerCitaPorTratamiento = async (tratamiento_paciente_id) => {
     ORDER BY c.fecha_hora
   `, [tratamiento_paciente_id]);
 
-  return result;
+    return result;
 };
 
 exports.obtenerCitasPorFecha = async (fecha) => {
@@ -342,7 +378,7 @@ exports.obtenerCitasPorFecha = async (fecha) => {
     return rows;
 };
 exports.obtenerHistorialCitasPorUsuario = async (usuarioId) => {
-  const query = `
+    const query = `
     SELECT 
         c.id AS cita_id,
         DATE_FORMAT(c.fecha_hora, '%Y-%m-%d %H:%i:%s') AS fecha_hora,
@@ -363,8 +399,8 @@ exports.obtenerHistorialCitasPorUsuario = async (usuarioId) => {
     ORDER BY c.fecha_hora DESC;
   `;
 
-  const [rows] = await db.execute(query, [usuarioId]);
-  return rows;
+    const [rows] = await db.execute(query, [usuarioId]);
+    return rows;
 };
 
 
