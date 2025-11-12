@@ -3,7 +3,7 @@ const db = require('../db');
 exports.crearPago = async (pago, connection) => {
     const query = `INSERT INTO pagos (usuario_id, paciente_id, cita_id, monto, metodo, estado, fecha_pago) 
                    VALUES (?, ?, ?, ?, ?, ?, ?)`;
-    
+
     const values = [
         pago.usuarioId,
         pago.pacienteId,
@@ -50,7 +50,7 @@ exports.crearNuevosPagos = async (pagos, connection) => {
     }
 
     const query = `INSERT INTO pagos (usuario_id, paciente_id, cita_id, monto, metodo, estado, fecha_pago) VALUES ?`;
-    
+
     const values = pagos.map(pago => [
         pago.usuarioId,
         pago.pacienteId,
@@ -145,7 +145,7 @@ exports.actualizarPagosYMarcarCitas = async (ids, metodo, fecha_pago, connection
     return { pagosActualizados: ids.length, citasActualizadas: citaIds.length };
 };
 exports.obtenerHistorialPagos = async () => {
-  const query = `
+    const query = `
     SELECT 
         p.id AS pago_id,
         p.fecha_pago,
@@ -169,8 +169,8 @@ exports.obtenerHistorialPagos = async () => {
     WHERE p.estado IN ('pagado', 'cancelado')
     ORDER BY p.fecha_pago DESC
   `;
-  const [rows] = await db.query(query);
-  return rows;
+    const [rows] = await db.query(query);
+    return rows;
 };
 
 exports.obtenerHistorialPagosPorUsuario = async (usuarioId) => {

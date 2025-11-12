@@ -11,6 +11,8 @@ router.get('/historial', pagoController.obtenerHistorialPagosAdmin);
 router.get('/historial/:usuarioId', pagoController.obtenerHistorialPagos);
 router.post('/pagar-por-ids', pagoController.pagarPagosPorIds);
 router.post('/crear-checkout', pagoController.crearCheckoutStripe);
-router.post('/movil/confirmar', pagoController.confirmarPagoMovil);
+router.post('/crear-checkout-movil', pagoController.crearCheckoutStripeMovil);
+router.post('/confirmar-desde-movil', pagoController.confirmarDesdeMovil);
+
 
 module.exports = router;
