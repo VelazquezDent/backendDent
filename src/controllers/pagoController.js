@@ -194,81 +194,77 @@ exports.pagarPagosPorIds = async (req, res) => {
     connection.release();
   }
 };
-// controllers/pagoController.js
 exports.crearCheckoutStripeMovil = async (req, res) => {
   try {
     const { pagos, redirectUrl } = req.body;
-    if (!pagos?.length) {
+    if (!Array.isArray(pagos) || pagos.length === 0) {
       return res.status(400).json({ mensaje: "Pagos inválidos." });
     }
 
     const line_items = pagos.map(p => ({
       price_data: {
-        currency: 'mxn',
+        currency: "mxn",
         product_data: { name: `Pago ID ${p.id}` },
         unit_amount: Math.round(Number(p.monto) * 100),
       },
       quantity: 1,
     }));
 
-    // fallback por si no mandan redirectUrl
+    // Expo (dev): viene redirectUrl desde la app
+    // APK (prod): fallback al esquema nativo
     const base = redirectUrl || "consultoriomovil://pagos/exito";
-    const ids = pagos.map(p => p.id).join(',');
-    const successUrl = `${base}?ids=${encodeURIComponent(ids)}&session_id={CHECKOUT_SESSION_ID}`;
-    const cancelUrl = (redirectUrl || "consultoriomovil://pagos/cancelado");
+    const cancelBase = redirectUrl || "consultoriomovil://pagos/cancelado";
+
+    const ids = pagos.map(p => p.id).join(",");
+    const success_url = `${base}?ids=${encodeURIComponent(ids)}&session_id={CHECKOUT_SESSION_ID}`;
+    const cancel_url = cancelBase;
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
+      payment_method_types: ["card"],
       line_items,
-      mode: 'payment',
-      success_url: successUrl,
-      cancel_url: cancelUrl,
+      mode: "payment",
+      success_url,
+      cancel_url,
     });
 
     return res.json({ url: session.url });
   } catch (e) {
-    console.error("Error crearCheckoutStripeMovil:", e);
+    console.error("crearCheckoutStripeMovil:", e);
     return res.status(500).json({ mensaje: "Error al iniciar pago con Stripe" });
   }
 };
 
-// === NUEVO: confirmar desde la app usando session_id y marcar pagados ===
 exports.confirmarDesdeMovil = async (req, res) => {
-  const connection = await require('../db').getConnection();
+  const connection = await require("../db").getConnection();
   try {
     const { session_id, pagosIds } = req.body;
-
     if (!session_id || !Array.isArray(pagosIds) || pagosIds.length === 0) {
-      return res.status(400).json({ mensaje: 'Faltan datos para confirmar el pago.' });
+      return res.status(400).json({ mensaje: "Faltan datos para confirmar el pago." });
     }
 
-    // Validar con Stripe que se pagó
     const session = await stripe.checkout.sessions.retrieve(session_id);
-    if (!session || session.payment_status !== 'paid') {
-      return res.status(400).json({ mensaje: 'El pago no está marcado como pagado en Stripe.' });
+    if (!session || session.payment_status !== "paid") {
+      return res.status(400).json({ mensaje: "El pago no está pagado en Stripe." });
     }
 
     await connection.beginTransaction();
-
-    // Actualizar pagos → 'pagado' y marcar citas
     const resultado = await pagoModel.pagarPagosPorIds(pagosIds, connection);
-
     if (resultado.pagos.length === 0) {
       await connection.rollback();
-      return res.status(404).json({ mensaje: 'No hay pagos pendientes con esos IDs.' });
+      return res.status(404).json({ mensaje: "No hay pagos pendientes con esos IDs." });
     }
-
     await connection.commit();
-    res.status(200).json({
-      mensaje: 'Pago confirmado y registrado correctamente.',
+
+    return res.status(200).json({
+      mensaje: "Pago confirmado y registrado.",
       totalPagado: resultado.pagos.length,
       fechaPago: resultado.fecha,
       pagosIds: resultado.pagos,
     });
-  } catch (error) {
+  } catch (e) {
     await connection.rollback();
-    console.error('Error en confirmarDesdeMovil:', error);
-    res.status(500).json({ mensaje: 'Error interno del servidor.' });
+    console.error("confirmarDesdeMovil:", e);
+    return res.status(500).json({ mensaje: "Error interno del servidor." });
   } finally {
     connection.release();
   }
