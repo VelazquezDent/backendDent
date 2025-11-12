@@ -194,11 +194,11 @@ exports.pagarPagosPorIds = async (req, res) => {
     connection.release();
   }
 };
-// === NUEVO: crear checkout para MÓVIL con deep link ===
+// controllers/pagoController.js
 exports.crearCheckoutStripeMovil = async (req, res) => {
   try {
-    const { pagos } = req.body;
-    if (!pagos || pagos.length === 0) {
+    const { pagos, redirectUrl } = req.body;
+    if (!pagos?.length) {
       return res.status(400).json({ mensaje: "Pagos inválidos." });
     }
 
@@ -211,23 +211,24 @@ exports.crearCheckoutStripeMovil = async (req, res) => {
       quantity: 1,
     }));
 
-    // Deep links de la app
-    const success_url = `consultorio://pagos-exito?ids=${pagos.map(p => p.id).join(",")}&session_id={CHECKOUT_SESSION_ID}`;
-    const cancel_url = `consultorio://pagos-cancelado`;
+    // fallback por si no mandan redirectUrl
+    const base = redirectUrl || "consultoriomovil://pagos/exito";
+    const ids = pagos.map(p => p.id).join(',');
+    const successUrl = `${base}?ids=${encodeURIComponent(ids)}&session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = (redirectUrl || "consultoriomovil://pagos/cancelado");
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items,
       mode: 'payment',
-      success_url,
-      cancel_url,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
     });
 
-    // devolvemos la URL de Stripe (Checkout)
-    res.json({ url: session.url });
-  } catch (error) {
-    console.error("Error al crear sesión de Stripe (móvil):", error);
-    res.status(500).json({ mensaje: "Error al iniciar pago con Stripe" });
+    return res.json({ url: session.url });
+  } catch (e) {
+    console.error("Error crearCheckoutStripeMovil:", e);
+    return res.status(500).json({ mensaje: "Error al iniciar pago con Stripe" });
   }
 };
 
