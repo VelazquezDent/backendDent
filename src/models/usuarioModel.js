@@ -209,7 +209,7 @@ const crearUsuarioGoogle = async ({
 }) => {
     const [result] = await db.query(
         `INSERT INTO usuarios 
-        (nombre, apellido_paterno, apellido_materno, telefono, fecha_nacimiento, sexo, email, password, tipo, verificado, codigo_verificacion, expiracion_codigo_verificacion, intentos_fall, tiempo_bloqueo, bloqueado)
+        (nombre, apellido_paterno, apellido_materno, telefono, fecha_nacimiento, sexo, email, password, tipo, verificado, codigo_verificacion, expiracion_codigo_verificacion, intentos_fallidos, tiempo_bloqueo, bloqueado)
          VALUES (?, ?, ?, NULL, NULL, 'otro', ?, ?, 'paciente', 1, NULL, NULL, 0, NULL, 0)`,
         [nombre, apellido_paterno, apellido_materno, email, hashedPassword]
     );
