@@ -29,7 +29,7 @@ app.use(cookieParser());
 // Configuración de CORS
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'https://consultoriovelazquezmcd.com', 'https://developer.amazon.com','https://predicciondentista.onrender.com'], // Permite peticiones desde estas URLs
+    origin: ['http://localhost:5173', 'http://localhost:8081', 'https://consultoriovelazquezmcd.com', 'https://developer.amazon.com', 'https://predicciondentista.onrender.com',], // Permite peticiones desde estas URLs
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'X-XSRF-TOKEN'],
@@ -53,7 +53,7 @@ const csrfExcludedRoutes = [
   '/api/alexa/login',      // Excluye el login de CSRF // Esta ruta nueva
   '/api/alexa/login-codigo', // Excluye el login con código de CSRF
   '/api/usuarios/login-movil',          // ⬅️ Login móvil
-  '/api/usuarios/movil/verificar-sesion' 
+  '/api/usuarios/movil/verificar-sesion'
 ];
 // Middleware para aplicar CSRF condicionalmente
 app.use((req, res, next) => {
