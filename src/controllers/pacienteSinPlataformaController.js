@@ -33,7 +33,7 @@ const registrarPacienteSinPlataforma = async (req, res) => {
             telefono,
             fecha_nacimiento,
             sexo,
-            email: email || null, // Si no se proporciona email, enviamos null
+            email: email || null,
             fecha_registro
         });
 

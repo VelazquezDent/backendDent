@@ -1,4 +1,4 @@
-const db = require('../db'); // 🔹 Importar la conexión a la base de datos
+const db = require('../db'); //  Importar la conexión a la base de datos
 const tratamientoPacienteModel = require('../models/tratamientoPacienteModel');
 const citaModel = require('../models/citaModel');
 const pagoModel = require('../models/pagoModel');
@@ -33,7 +33,7 @@ exports.crearTratamientoCompleto = async (req, res) => {
             throw new Error(" Error: No se pudo crear el tratamiento.");
         }
 
-        console.log(`✔️ Tratamiento creado con ID: ${tratamientoPacienteId}`);
+        console.log(` Tratamiento creado con ID: ${tratamientoPacienteId}`);
 
         // 2️⃣ **Crear las citas**
         let citas = [{
@@ -54,10 +54,10 @@ exports.crearTratamientoCompleto = async (req, res) => {
             }
         }
 
-        console.log("📅 Citas a crear:", citas);
+        console.log(" Citas a crear:", citas);
 
         await citaModel.crearCitas(citas, connection);
-        console.log(`✔️ ${citas.length} citas creadas.`);
+        console.log(` ${citas.length} citas creadas.`);
 
         // 3️⃣ **Confirmar transacción antes de obtener citas**
         await connection.commit();
@@ -85,7 +85,7 @@ exports.crearTratamientoCompleto = async (req, res) => {
         if (pagos.length > 0) {
             console.log(" Generando pagos para citas:", pagos);
             await pagoModel.crearPagos(pagos, connection);
-            console.log(`✔️ ${pagos.length} pagos creados correctamente.`);
+            console.log(` ${pagos.length} pagos creados correctamente.`);
         } else {
             console.warn("No hay pagos para insertar.");
         }
@@ -145,7 +145,7 @@ exports.verificarTratamientoActivo = async (req, res) => {
         res.status(200).json({
             tieneTratamientoActivo: false,
             puedeCrearNuevo: haCompletado,
-            mensaje: haCompletado 
+            mensaje: haCompletado
                 ? "El usuario ya ha completado un tratamiento y puede crear uno nuevo."
                 : "El usuario no tiene registros de tratamientos."
         });
@@ -163,11 +163,11 @@ exports.verificarTratamientoActivoTipo = async (req, res) => {
         let haCompletado = false;
 
         if (tipo === 'usuario') {
-            // 🔹 Verificar si el usuario de la tabla `usuarios` tiene un tratamiento activo
+            //  Verificar si el usuario de la tabla `usuarios` tiene un tratamiento activo
             tratamientoActivo = await tratamientoPacienteModel.tieneTratamientoActivoTipo(id, 'usuario');
             haCompletado = await tratamientoPacienteModel.haCompletadoTratamientoTipo(id, 'usuario');
         } else if (tipo === 'paciente_sin_plataforma') {
-            // 🔹 Verificar si el paciente de la tabla `pacientes_sin_plataforma` tiene un tratamiento activo
+            //  Verificar si el paciente de la tabla `pacientes_sin_plataforma` tiene un tratamiento activo
             tratamientoActivo = await tratamientoPacienteModel.tieneTratamientoActivoTipo(id, 'paciente_sin_plataforma');
             haCompletado = await tratamientoPacienteModel.haCompletadoTratamientoTipo(id, 'paciente_sin_plataforma');
         } else {
@@ -185,7 +185,7 @@ exports.verificarTratamientoActivoTipo = async (req, res) => {
         res.status(200).json({
             tieneTratamientoActivo: false,
             puedeCrearNuevo: haCompletado,
-            mensaje: haCompletado 
+            mensaje: haCompletado
                 ? "El usuario ya ha completado un tratamiento y puede crear uno nuevo."
                 : "El usuario no tiene registros de tratamientos."
         });
@@ -286,7 +286,7 @@ exports.crearNuevoTratamientoConCitasYPagos = async (req, res) => {
 
             if (citasNuevas.length > 0) {
                 await citaModel.crearNuevasCitas(citasNuevas, connection);
-                console.log(`✔️ ${citasNuevas.length} nuevas citas creadas.`);
+                console.log(` ${citasNuevas.length} nuevas citas creadas.`);
             }
 
             // Obtener todas las citas nuevamente
@@ -307,7 +307,7 @@ exports.crearNuevoTratamientoConCitasYPagos = async (req, res) => {
 
             if (nuevosPagos.length > 0) {
                 await pagoModel.crearNuevosPagos(nuevosPagos, connection);
-                console.log(`✔️ ${nuevosPagos.length} nuevos pagos creados correctamente.`);
+                console.log(` ${nuevosPagos.length} nuevos pagos creados correctamente.`);
             }
         } else {
             console.log("No es necesario crear nuevas citas o pagos, solo se actualizaron los montos existentes.");
@@ -315,7 +315,7 @@ exports.crearNuevoTratamientoConCitasYPagos = async (req, res) => {
 
         // 7️⃣ Actualizar citas_totales y estado del tratamiento a "en progreso"
         await tratamientoPacienteModel.actualizarCitasTotalesYEstado(tratamientoPacienteId, citasTotales, 'en progreso', connection);
-        console.log(`✔️ Tratamiento actualizado con citas_totales: ${citasTotales} y estado: 'en progreso'.`);
+        console.log(` Tratamiento actualizado con citas_totales: ${citasTotales} y estado: 'en progreso'.`);
 
         await connection.commit();
 

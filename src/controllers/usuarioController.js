@@ -1,5 +1,5 @@
 const userModel = require('../models/usuarioModel');
-const jwt = require('jsonwebtoken');   
+const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'secreto_super_seguro';
 
 const {
@@ -34,7 +34,7 @@ const registrarUsuario = async (req, res) => {
         if (!fecha_nacimiento || new Date(fecha_nacimiento) > new Date()) {
             errores.push("Fecha de nacimiento inválida.");
         }
-        
+
 
         const errorCorreo = validarCorreo(email);
         if (errorCorreo) errores.push(errorCorreo);
@@ -50,18 +50,18 @@ const registrarUsuario = async (req, res) => {
         if (errores.length > 0) {
             return res.status(400).json({ errores });
         }
-          // Verificar si el correo ya está registrado
-          const usuarioExistentePorCorreo = await userModel.obtenerUsuarioPorEmail(email);
-          if (usuarioExistentePorCorreo) {
-              return res.status(409).json({ mensaje: 'El correo ya está registrado. Usa otro correo electrónico.' });
-          }
-  
-          // Verificar si el teléfono ya está registrado
-          const usuarioExistentePorTelefono = await userModel.obtenerUsuarioPorTelefono(telefono);
-          if (usuarioExistentePorTelefono) {
-              return res.status(409).json({ mensaje: 'El teléfono ya está registrado. Usa otro número de teléfono.' });
-          }
-  
+        // Verificar si el correo ya está registrado
+        const usuarioExistentePorCorreo = await userModel.obtenerUsuarioPorEmail(email);
+        if (usuarioExistentePorCorreo) {
+            return res.status(409).json({ mensaje: 'El correo ya está registrado. Usa otro correo electrónico.' });
+        }
+
+        // Verificar si el teléfono ya está registrado
+        const usuarioExistentePorTelefono = await userModel.obtenerUsuarioPorTelefono(telefono);
+        if (usuarioExistentePorTelefono) {
+            return res.status(409).json({ mensaje: 'El teléfono ya está registrado. Usa otro número de teléfono.' });
+        }
+
 
         // Hashear la contraseña
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -466,34 +466,103 @@ const cambiarPasswordPorId = async (req, res) => {
     }
 };
 const obtenerPacientesParaPrediccion = async (req, res) => {
-  try {
-    const pacientes = await userModel.obtenerDatosParaPrediccion();
-    const diaSemana = new Date().getDay();
+    try {
+        const pacientes = await userModel.obtenerDatosParaPrediccion();
+        const diaSemana = new Date().getDay();
 
-    const pacientesConDia = pacientes.map(p => {
-  const fecha = new Date(p.proxima_cita);
-  const diaSemana = fecha.getDay(); // 0 = domingo, 1 = lunes, etc.
+        const pacientesConDia = pacientes.map(p => {
+            const fecha = new Date(p.proxima_cita);
+            const diaSemana = fecha.getDay(); // 0 = domingo, 1 = lunes, etc.
 
-  return {
-    ...p,
-    dia_semana: diaSemana
-  };
-});
+            return {
+                ...p,
+                dia_semana: diaSemana
+            };
+        });
 
 
-    res.json(pacientesConDia);
-  } catch (error) {
-    console.error(' Error al obtener pacientes para predicción:', error);
-    res.status(500).json({ error: 'Error al obtener datos para predicción' });
-  }
+        res.json(pacientesConDia);
+    } catch (error) {
+        console.error(' Error al obtener pacientes para predicción:', error);
+        res.status(500).json({ error: 'Error al obtener datos para predicción' });
+    }
+};
+const loginGoogleMovil = async (req, res) => {
+    try {
+        const { email, nombreCompleto } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ mensaje: "El correo es obligatorio." });
+        }
+
+        // Buscar si ya existe el usuario
+        let usuario = await userModel.obtenerUsuarioPorEmail(email);
+
+        // Si no existe, lo creamos
+        if (!usuario) {
+            const partes = (nombreCompleto || "").split(" ");
+            const nombre = partes[0] || "Paciente";
+            const apellido_paterno = partes[1] || "Google";
+            const apellido_materno = partes.slice(2).join(" ") || "";
+
+            // Creamos una contraseña aleatoria solo para cumplir con el NOT NULL
+            const passwordTemporal = crypto.randomBytes(12).toString("hex");
+            const hashedPassword = await bcrypt.hash(passwordTemporal, 10);
+
+            const nuevoId = await userModel.crearUsuarioGoogle({
+                nombre,
+                apellido_paterno,
+                apellido_materno,
+                email,
+                hashedPassword
+            });
+
+            // Guardamos también en el historial
+            await userModel.guardarHistorialContrasena(nuevoId, hashedPassword);
+
+            usuario = await userModel.obtenerUsuarioPorId(nuevoId);
+        }
+
+        // Solo permitir tipo paciente en app móvil
+        if (usuario.tipo !== 'paciente') {
+            return res.status(403).json({ mensaje: 'Solo pacientes pueden acceder desde la app móvil.' });
+        }
+
+        // Si está bloqueado, no dejar entrar
+        if (usuario.bloqueado === 1) {
+            return res.status(403).json({ mensaje: 'Tu cuenta está bloqueada. Contacta al consultorio.' });
+        }
+
+        // Generar JWT igual que en loginPacienteMovil
+        const token = jwt.sign(
+            { id: usuario.id, tipo: usuario.tipo },
+            JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        return res.status(200).json({
+            mensaje: 'Inicio de sesión con Google exitoso',
+            token,
+            usuario: {
+                id: usuario.id,
+                nombre: usuario.nombre,
+                email: usuario.email,
+                tipo: usuario.tipo
+            }
+        });
+
+    } catch (error) {
+        console.error('Error login Google móvil:', error);
+        return res.status(500).json({ mensaje: 'Error interno del servidor.' });
+    }
 };
 
-module.exports = { 
-    buscarUsuario, 
-    registrarUsuario, 
-    verificarCodigo, 
-    loginUsuario, 
-    enviarCorreoRecuperacion, 
+module.exports = {
+    buscarUsuario,
+    registrarUsuario,
+    verificarCodigo,
+    loginUsuario,
+    enviarCorreoRecuperacion,
     cambiarPassword,
     logoutUsuario,
     verificarSesion,
@@ -501,6 +570,7 @@ module.exports = {
     obtenerPerfilUsuario,
     cambiarPasswordPorId,
     obtenerPacientesParaPrediccion,
-    loginPacienteMovil ,
-    verificarSesionMovil
+    loginPacienteMovil,
+    verificarSesionMovil,
+    loginGoogleMovil
 };

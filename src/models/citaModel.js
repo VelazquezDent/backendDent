@@ -30,7 +30,7 @@ exports.crearCitas = async (citas, connection) => {
     ]);
 
     await connection.query(query, [values]);
-    console.log(`✔️ Se insertaron ${citas.length} citas.`);
+    console.log(` Se insertaron ${citas.length} citas.`);
 };
 
 exports.obtenerCitasPorTratamiento = async (tratamientoPacienteId, connection) => {
@@ -208,7 +208,7 @@ exports.crearNuevasCitas = async (citas, connection) => {
     ]);
 
     await connection.query(query, [values]);
-    console.log(`✔️ Se insertaron ${citas.length} nuevas citas.`);
+    console.log(` Se insertaron ${citas.length} nuevas citas.`);
 };
 
 exports.obtenerNuevasCitasPorTratamiento = async (tratamientoPacienteId, connection) => {
@@ -394,8 +394,8 @@ exports.obtenerHistorialCitasPorUsuario = async (usuarioId) => {
     JOIN tratamientos t ON tp.tratamiento_id = t.id
     WHERE 
         tp.usuario_id = ?
-        AND c.estado IN ('cancelado', 'completada')  -- 🔹 Solo citas canceladas o completadas
-        AND c.fecha_hora IS NOT NULL                 -- 🔹 Excluir citas sin fecha programada
+        AND c.estado IN ('cancelado', 'completada')  --  Solo citas canceladas o completadas
+        AND c.fecha_hora IS NOT NULL                 --  Excluir citas sin fecha programada
     ORDER BY c.fecha_hora DESC;
   `;
 

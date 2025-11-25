@@ -16,7 +16,7 @@ exports.crearCitas = async (req, res) => {
         // Insertar las citas en la base de datos
         const resultado = await citaModel.crearCitas(citas);
 
-        // Recuperar las citas creadas (puedes ajustar esto según cómo estés manejando los IDs)
+        // Recuperar las citas creadas 
         const citasCreadas = await citaModel.obtenerCitasPorTratamiento(tratamientoPacienteId);
 
         res.status(201).json({ mensaje: 'Citas creadas exitosamente', citas: citasCreadas });
@@ -35,7 +35,6 @@ exports.obtenerCitasPorUsuario = async (req, res) => {
         res.status(500).json({ mensaje: 'Error al obtener citas del usuario' });
     }
 };
-// 👇 NUEVO CONTROLADOR
 exports.obtenerCitasPorUsuarioConTratamiento = async (req, res) => {
     try {
         const { usuarioId } = req.params;
@@ -102,7 +101,7 @@ exports.completarCita = async (req, res) => {
         const { id } = req.params; // ID de la cita
         const { comentario } = req.body; // Comentario opcional
 
-        console.log("📩 Comentario recibido:", comentario); // 🔹 LOG para verificar
+        console.log("Comentario recibido:", comentario); //  LOG para verificar
 
         // Validar si la cita existe antes de actualizar
         const citaExistente = await citaModel.obtenerCitaPorId(id);
@@ -117,7 +116,7 @@ exports.completarCita = async (req, res) => {
             return res.status(404).json({ mensaje: "No se pudo actualizar la cita." });
         }
 
-        console.log("✔️ Cita actualizada con comentario:", comentario); // 🔹 LOG de éxito
+        console.log(" Cita actualizada con comentario:", comentario); //  LOG de éxito
 
         res.status(200).json({ mensaje: "Cita marcada como completada correctamente." });
     } catch (error) {
@@ -130,7 +129,7 @@ exports.actualizarFechaHoraCita = async (req, res) => {
         const { id } = req.params; // ID de la cita
         const { fechaHora } = req.body; // Nueva fecha y hora
 
-        console.log(`📅 Intentando actualizar la cita ID: ${id} con nueva fecha/hora: ${fechaHora}`);
+        console.log(` Intentando actualizar la cita ID: ${id} con nueva fecha/hora: ${fechaHora}`);
 
         if (!fechaHora) {
             return res.status(400).json({ mensaje: "La nueva fecha y hora son obligatorias." });
@@ -143,7 +142,7 @@ exports.actualizarFechaHoraCita = async (req, res) => {
             return res.status(400).json({ mensaje: resultado.message });
         }
 
-        console.log("✔️ Fecha y hora de la cita actualizadas correctamente.");
+        console.log(" Fecha y hora de la cita actualizadas correctamente.");
         res.status(200).json({ mensaje: "Fecha y hora de la cita actualizadas correctamente." });
     } catch (error) {
         console.error(" Error al actualizar la fecha y hora de la cita:", error);
@@ -206,7 +205,7 @@ exports.obtenerHistorialCitasPorUsuario = async (req, res) => {
         const citas = await citaModel.obtenerHistorialCitasPorUsuario(usuarioId);
         res.status(200).json(citas);
     } catch (error) {
-        console.error("❌ Error al obtener historial de citas:", error);
+        console.error(" Error al obtener historial de citas:", error);
         res.status(500).json({ mensaje: "Error al obtener historial de citas del usuario" });
     }
 };

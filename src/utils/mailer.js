@@ -1,4 +1,4 @@
-const nodemailer = require('nodemailer'); 
+const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 /* 
@@ -18,7 +18,7 @@ const transporter = nodemailer.createTransport({
         pass: process.env.SMTP_PASS,
     },
     tls: {
-        rejectUnauthorized: false, // 🔹 evitar problemas de certificado en Render
+        rejectUnauthorized: false, //  evitar problemas de certificado en Render
     },
 });
 */

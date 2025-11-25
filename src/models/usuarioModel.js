@@ -117,7 +117,7 @@ const buscarEnUsuarios = async (nombre, apellido_paterno, apellido_materno, fech
     let query = `SELECT id, nombre, apellido_paterno, apellido_materno, telefono, fecha_nacimiento, sexo, email, 'usuario' AS tipo 
                  FROM usuarios 
                  WHERE nombre = ? AND apellido_paterno = ? AND apellido_materno = ? AND fecha_nacimiento = ?`;
-    
+
     const params = [nombre, apellido_paterno, apellido_materno, fecha_nacimiento];
 
     if (email) {
@@ -138,7 +138,7 @@ const buscarEnPacientesSinPlataforma = async (nombre, apellido_paterno, apellido
     let query = `SELECT id, nombre, apellido_paterno, apellido_materno, telefono, fecha_nacimiento, sexo, email, 'paciente_sin_plataforma' AS tipo 
                  FROM pacientes_sin_plataforma 
                  WHERE nombre = ? AND apellido_paterno = ? AND apellido_materno = ? AND fecha_nacimiento = ?`;
-    
+
     const params = [nombre, apellido_paterno, apellido_materno, fecha_nacimiento];
 
     if (email) {
@@ -168,7 +168,7 @@ const obtenerUsuarioPorId = async (id) => {
     return result.length > 0 ? result[0] : null;
 };
 const obtenerDatosParaPrediccion = async () => {
-  const [rows] = await db.query(`
+    const [rows] = await db.query(`
    SELECT 
   u.id,
   CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS nombre_completo,
@@ -197,7 +197,24 @@ WHERE u.tipo = 'paciente'
 
   `);
 
-  return rows;
+    return rows;
+};
+// Crear usuario a partir de login con Google
+const crearUsuarioGoogle = async ({
+    nombre,
+    apellido_paterno,
+    apellido_materno,
+    email,
+    hashedPassword
+}) => {
+    const [result] = await db.query(
+        `INSERT INTO usuarios 
+        (nombre, apellido_paterno, apellido_materno, telefono, fecha_nacimiento, sexo, email, password, tipo, verificado, codigo_verificacion, expiracion_codigo_verificacion, intentos_fall, tiempo_bloqueo, bloqueado)
+         VALUES (?, ?, ?, NULL, NULL, 'otro', ?, ?, 'paciente', 1, NULL, NULL, 0, NULL, 0)`,
+        [nombre, apellido_paterno, apellido_materno, email, hashedPassword]
+    );
+
+    return result.insertId;
 };
 
 module.exports = {
@@ -217,5 +234,6 @@ module.exports = {
     buscarEnPacientesSinPlataforma,
     obtenerTodosLosPacientes,
     obtenerUsuarioPorId,
-    obtenerDatosParaPrediccion
+    obtenerDatosParaPrediccion,
+    crearUsuarioGoogle
 };

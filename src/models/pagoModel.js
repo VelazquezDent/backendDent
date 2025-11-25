@@ -40,7 +40,7 @@ exports.crearPagos = async (pagos, connection) => {
     ]);
 
     await connection.query(query, [values]);
-    console.log(`✔️ Se insertaron ${pagos.length} pagos.`);
+    console.log(` Se insertaron ${pagos.length} pagos.`);
 };
 
 exports.crearNuevosPagos = async (pagos, connection) => {
@@ -62,7 +62,7 @@ exports.crearNuevosPagos = async (pagos, connection) => {
     ]);
 
     await connection.query(query, [values]);
-    console.log(`✔️ Se insertaron ${pagos.length} nuevos pagos.`);
+    console.log(` Se insertaron ${pagos.length} nuevos pagos.`);
 };
 exports.obtenerNuevosPagosPorTratamiento = async (tratamientoPacienteId, connection) => {
     const query = `
@@ -85,7 +85,7 @@ exports.obtenerPagosPorCitas = async (citaIds, connection) => {
 exports.actualizarMontoPago = async (pagoId, nuevoMonto, connection) => {
     const query = `UPDATE pagos SET monto = ? WHERE id = ?`;
     await connection.query(query, [nuevoMonto, pagoId]);
-    console.log(`✔️ Pago ${pagoId} actualizado con monto: ${nuevoMonto}`);
+    console.log(` Pago ${pagoId} actualizado con monto: ${nuevoMonto}`);
 };
 exports.obtenerPagosPendientesPorUsuario = async (usuarioId, connection) => {
     const query = `

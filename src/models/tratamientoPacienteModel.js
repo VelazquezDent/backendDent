@@ -35,9 +35,9 @@ exports.obtenerTratamientosEnProgreso = async () => {
     WHERE tp.estado = ?;
 `;
 
-const values = ['en progreso'];
-const [rows] = await db.query(query, values);
-return rows;
+    const values = ['en progreso'];
+    const [rows] = await db.query(query, values);
+    return rows;
 
 };
 
@@ -139,7 +139,7 @@ exports.actualizarCitasTotalesYEstado = async (tratamientoPacienteId, citasTotal
         WHERE id = ?;
     `;
     await connection.query(query, [citasTotales, estado, tratamientoPacienteId]);
-    console.log(`✔️ Tratamiento ${tratamientoPacienteId} actualizado: citas_totales = ${citasTotales}, estado = ${estado}`);
+    console.log(` Tratamiento ${tratamientoPacienteId} actualizado: citas_totales = ${citasTotales}, estado = ${estado}`);
 };
 
 exports.obtenerHistorialPorUsuario = async (usuario_id) => {

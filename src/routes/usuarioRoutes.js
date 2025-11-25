@@ -38,5 +38,6 @@ router.get('/perfil/:id', usuarioController.obtenerPerfilUsuario);
 router.post('/cambiar-password/:id', usuarioController.cambiarPasswordPorId);
 
 router.get('/prediccion-pacientes', usuarioController.obtenerPacientesParaPrediccion);
+router.post('/login-google-movil', usuarioController.loginGoogleMovil);
 
 module.exports = router;
