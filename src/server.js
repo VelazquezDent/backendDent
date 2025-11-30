@@ -93,7 +93,7 @@ app.use('/api/configuraciones', ConfiguracionesRoutes); // Usar las rutas de con
 app.use('/api/reportes', reportesRoutes);
 
 
-// 🔐 Manejo de errores CSRF
+//  Manejo de errores CSRF
 app.use((err, req, res, next) => {
   if (err.code === 'EBADCSRFTOKEN') {
     return res.status(403).json({ message: 'Fallo en la validación del CSRF token' });
@@ -102,7 +102,7 @@ app.use((err, req, res, next) => {
   res.status(500).send('¡Algo salió mal en el servidor!');
 });
 
-// 🚀 Iniciar el servidor
+//  Iniciar el servidor
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
 });

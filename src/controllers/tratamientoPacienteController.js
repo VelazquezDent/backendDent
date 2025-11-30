@@ -11,7 +11,7 @@ exports.crearTratamientoCompleto = async (req, res) => {
         const { usuarioId, pacienteId, tratamientoId, citasTotales, fechaInicio, precio, requiereEvaluacion } = req.body;
 
         console.log(" Iniciando creación de tratamiento...");
-        console.log("📥 Datos recibidos:", { usuarioId, pacienteId, tratamientoId, citasTotales, fechaInicio, precio, requiereEvaluacion });
+        console.log(" Datos recibidos:", { usuarioId, pacienteId, tratamientoId, citasTotales, fechaInicio, precio, requiereEvaluacion });
 
         // Validación correcta de datos obligatorios
         if ((usuarioId === null && pacienteId === null) || !tratamientoId || !precio || (!requiereEvaluacion && citasTotales < 1)) {
@@ -267,7 +267,7 @@ exports.crearNuevoTratamientoConCitasYPagos = async (req, res) => {
         if (pagosExistentes.length > 0) {
             for (let pago of pagosExistentes) {
                 await pagoModel.actualizarMontoPago(pago.id, precioPorCita, connection);
-                console.log(`🔄 Monto del pago ${pago.id} actualizado a ${precioPorCita}.`);
+                console.log(` Monto del pago ${pago.id} actualizado a ${precioPorCita}.`);
             }
         }
 

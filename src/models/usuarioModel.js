@@ -216,6 +216,104 @@ const crearUsuarioGoogle = async ({
 
     return result.insertId;
 };
+const actualizarDatosPersonales = async (id, {
+    nombre,
+    apellido_paterno,
+    apellido_materno,
+    fecha_nacimiento,
+    sexo
+}) => {
+    await db.query(
+        `UPDATE usuarios 
+         SET nombre = ?, apellido_paterno = ?, apellido_materno = ?, 
+             fecha_nacimiento = ?, sexo = ?
+         WHERE id = ?`,
+        [nombre, apellido_paterno, apellido_materno, fecha_nacimiento, sexo, id]
+    );
+};
+const eliminarUsuarioConRelaciones = async (usuarioId) => {
+    const conn = await db.getConnection();
+
+    try {
+        await conn.beginTransaction();
+
+        // 1) Historial médico del usuario
+        await conn.query(
+            "DELETE FROM historial_medico WHERE usuario_id = ?",
+            [usuarioId]
+        );
+
+        // 2) Tokens de recuperación
+        await conn.query(
+            "DELETE FROM tokens_recuperacion WHERE usuario_id = ?",
+            [usuarioId]
+        );
+
+        // 3) Historial de contraseñas
+        await conn.query(
+            "DELETE FROM historial_contraseñas WHERE usuario_id = ?",
+            [usuarioId]
+        );
+
+        // 4) Tratamientos del paciente (tratamientos_pacientes)
+        const [tratamientos] = await conn.query(
+            "SELECT id FROM tratamientos_pacientes WHERE usuario_id = ?",
+            [usuarioId]
+        );
+        const tpIds = tratamientos.map((t) => t.id);
+
+        if (tpIds.length > 0) {
+            // 4.1) Citas ligadas a esos tratamientos
+            const [citas] = await conn.query(
+                "SELECT id FROM citas WHERE tratamiento_paciente_id IN (?)",
+                [tpIds]
+            );
+            const citaIds = citas.map((c) => c.id);
+
+            if (citaIds.length > 0) {
+                // 4.1.1) Pagos relacionados a esas citas
+                await conn.query(
+                    "DELETE FROM pagos WHERE cita_id IN (?)",
+                    [citaIds]
+                );
+
+                // 4.1.2) Citas
+                await conn.query(
+                    "DELETE FROM citas WHERE id IN (?)",
+                    [citaIds]
+                );
+            }
+
+            // 4.2) Pagos directos por usuario (por si hay pagos sin cita)
+            await conn.query(
+                "DELETE FROM pagos WHERE usuario_id = ?",
+                [usuarioId]
+            );
+
+            // 4.3) Tratamientos del paciente
+            await conn.query(
+                "DELETE FROM tratamientos_pacientes WHERE usuario_id = ?",
+                [usuarioId]
+            );
+        } else {
+            // Si no tiene tratamientos, al menos borra pagos directos
+            await conn.query(
+                "DELETE FROM pagos WHERE usuario_id = ?",
+                [usuarioId]
+            );
+        }
+
+        // 5) Finalmente, borrar el usuario
+        await conn.query("DELETE FROM usuarios WHERE id = ?", [usuarioId]);
+
+        await conn.commit();
+    } catch (error) {
+        await conn.rollback();
+        throw error;
+    } finally {
+        conn.release();
+    }
+};
 
 module.exports = {
     crearUsuario,
@@ -235,5 +333,7 @@ module.exports = {
     obtenerTodosLosPacientes,
     obtenerUsuarioPorId,
     obtenerDatosParaPrediccion,
-    crearUsuarioGoogle
+    crearUsuarioGoogle,
+    actualizarDatosPersonales,
+    eliminarUsuarioConRelaciones
 };

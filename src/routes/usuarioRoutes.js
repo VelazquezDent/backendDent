@@ -25,7 +25,7 @@ router.post('/cambiar-password', usuarioController.cambiarPassword);
 
 // Ruta para verificar la sesión (protegida)
 router.get('/verificar-sesion', autenticarUsuario(), usuarioController.verificarSesion);
-// 🚀 Ruta para verificar sesión en móvil
+//  Ruta para verificar sesión en móvil
 router.get('/movil/verificar-sesion', authMovil, usuarioController.verificarSesionMovil);
 
 // Endpoint para buscar usuario
@@ -40,4 +40,9 @@ router.post('/cambiar-password/:id', usuarioController.cambiarPasswordPorId);
 router.get('/prediccion-pacientes', usuarioController.obtenerPacientesParaPrediccion);
 router.post('/login-google-movil', usuarioController.loginGoogleMovil);
 
+// rutas/usuarioRoutes.js
+router.put('/:id/datos-personales', usuarioController.editarDatosPersonalesAdmin);
+
+// NUEVO: eliminar usuario + todas sus relaciones
+router.delete('/:id', usuarioController.eliminarUsuarioYRelaciones);
 module.exports = router;

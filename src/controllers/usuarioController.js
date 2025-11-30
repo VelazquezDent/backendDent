@@ -556,6 +556,82 @@ const loginGoogleMovil = async (req, res) => {
         return res.status(500).json({ mensaje: 'Error interno del servidor.' });
     }
 };
+const editarDatosPersonalesAdmin = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nombre, apellido_paterno, apellido_materno, fecha_nacimiento, sexo } = req.body;
+
+
+        // 2. Verificar que el usuario exista
+        const usuario = await userModel.obtenerUsuarioPorId(id);
+        if (!usuario) {
+            return res.status(404).json({ mensaje: 'Usuario no encontrado.' });
+        }
+
+        // 3. Validaciones de los campos
+        const errores = [];
+
+        const errorNombre = validarNombre(nombre);
+        if (errorNombre) errores.push('Nombre: ' + errorNombre);
+
+        const errorApellidoPaterno = validarNombre(apellido_paterno);
+        if (errorApellidoPaterno) errores.push('Apellido paterno: ' + errorApellidoPaterno);
+
+        const errorApellidoMaterno = apellido_materno
+            ? validarNombre(apellido_materno)
+            : null;
+        if (errorApellidoMaterno) errores.push('Apellido materno: ' + errorApellidoMaterno);
+
+        if (!fecha_nacimiento || new Date(fecha_nacimiento) > new Date()) {
+            errores.push('Fecha de nacimiento inválida.');
+        }
+
+        const sexosValidos = ['masculino', 'femenino', 'otro'];
+        if (!sexo || !sexosValidos.includes(sexo)) {
+            errores.push('Sexo inválido. Debe ser "masculino", "femenino" u "otro".');
+        }
+
+        if (errores.length > 0) {
+            return res.status(400).json({ errores });
+        }
+
+        // 4. Actualizar en BD
+        await userModel.actualizarDatosPersonales(id, {
+            nombre,
+            apellido_paterno,
+            apellido_materno,
+            fecha_nacimiento,
+            sexo
+        });
+
+        return res.status(200).json({ mensaje: 'Datos personales actualizados correctamente.' });
+    } catch (error) {
+        console.error('Error al editar datos personales (admin):', error);
+        return res.status(500).json({ mensaje: 'Error interno del servidor.' });
+    }
+};
+const eliminarUsuarioYRelaciones = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Verificar que el usuario exista
+        const usuario = await userModel.obtenerUsuarioPorId(id);
+        if (!usuario) {
+            return res.status(404).json({ mensaje: "Usuario no encontrado." });
+        }
+
+        await userModel.eliminarUsuarioConRelaciones(id);
+
+        return res.status(200).json({
+            mensaje:
+                "Usuario eliminado correctamente junto con sus tratamientos, citas, pagos, historial médico, tokens y contraseñas."
+        });
+    } catch (error) {
+        console.error("Error al eliminar usuario y sus relaciones:", error);
+        return res.status(500).json({ mensaje: "Error interno del servidor." });
+    }
+};
+
 
 module.exports = {
     buscarUsuario,
@@ -572,5 +648,7 @@ module.exports = {
     obtenerPacientesParaPrediccion,
     loginPacienteMovil,
     verificarSesionMovil,
-    loginGoogleMovil
+    loginGoogleMovil,
+    editarDatosPersonalesAdmin,
+    eliminarUsuarioYRelaciones
 };
